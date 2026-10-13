@@ -1,0 +1,2907 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="theme-color" content="#06152b">
+<meta name="description" content="ТЕСТ — магазин техники Apple и Samsung. 3D-каталог iPhone и Galaxy.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ТЕСТ — Магазин техники</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', 'Helvetica Neue', sans-serif; }
+
+  :root {
+    --bg-1: #06152b; --bg-2: #0a2540;
+    --card-1: rgba(30,58,138,0.35); --card-2: rgba(6,21,43,0.6);
+    --text: #e0f2fe; --text-dim: #7dd3fc;
+    --border: rgba(96,165,250,0.25);
+    --glow: rgba(96, 165, 250, 0.5);
+    --accent-1: #3b82f6; --accent-2: #22d3ee;
+  }
+
+  body.light-theme {
+    --bg-1: #f0f9ff; --bg-2: #e0f2fe;
+    --card-1: rgba(255,255,255,0.85); --card-2: rgba(240,249,255,0.9);
+    --text: #0a2540; --text-dim: #0369a1;
+    --border: rgba(59,130,246,0.3);
+    --glow: rgba(59, 130, 246, 0.35);
+    --accent-1: #2563eb; --accent-2: #0891b2;
+  }
+
+  body.apple-theme {
+    --bg-1: #ffffff; --bg-2: #fafafa;
+    --card-1: rgba(255,255,255,0.95); --card-2: rgba(250,250,250,0.95);
+    --text: #1d1d1f; --text-dim: #6e6e73;
+    --border: rgba(0,0,0,0.08);
+    --glow: rgba(0, 0, 0, 0.06);
+    --accent-1: #1d1d1f; --accent-2: #0071e3;
+  }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background:
+      radial-gradient(ellipse at 20% 0%, var(--bg-2) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, #0891b2 0%, transparent 50%),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-1) 100%);
+    background-attachment: fixed;
+    color: var(--text);
+    overflow-x: hidden;
+    transition: background 0.8s ease, color 0.4s ease;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  body.apple-theme { background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%); }
+  body.apple-theme::before { opacity: 0.15; }
+  body.apple-theme .smoke-container { opacity: 0.15; }
+  body.apple-theme .brand-glow { opacity: 0.15; }
+
+  .theme-wave {
+    position: fixed; top: 0; left: 0;
+    width: 0; height: 0; border-radius: 50%;
+    background: radial-gradient(circle, rgba(34,211,238,0.6), rgba(59,130,246,0.4), transparent 70%);
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%); opacity: 0;
+  }
+  .theme-wave.active { animation: themeWaveExpand 1s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+  @keyframes themeWaveExpand {
+    0% { width: 0; height: 0; opacity: 0.9; }
+    100% { width: 300vmax; height: 300vmax; opacity: 0; }
+  }
+
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(59,130,246,0.15) 0%, transparent 40%),
+      radial-gradient(circle at 70% 60%, rgba(34,211,238,0.12) 0%, transparent 40%);
+    animation: shimmerBg 12s ease-in-out infinite alternate;
+    pointer-events: none; z-index: 0; transition: opacity 0.8s;
+  }
+  @keyframes shimmerBg {
+    0% { opacity: 0.6; transform: scale(1) rotate(0deg); }
+    100% { opacity: 1; transform: scale(1.15) rotate(3deg); }
+  }
+
+  /* ПРЕЛОАДЕР */
+  #loader {
+    position: fixed; inset: 0;
+    background: linear-gradient(180deg, #06152b, #0a2540);
+    z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.6s ease, visibility 0.6s;
+  }
+  #loader.done {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  .loader-inner { text-align: center; padding: 0 20px; }
+  .loader-logo {
+    font-size: 3rem; font-weight: 900; letter-spacing: 12px;
+    background: linear-gradient(90deg, #60a5fa, #22d3ee, #93c5fd, #60a5fa);
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmerText 2s linear infinite;
+    margin-bottom: 30px;
+  }
+  @keyframes shimmerText {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+  .loader-bar {
+    width: 260px; max-width: 70vw; height: 3px;
+    background: rgba(96,165,250,0.15);
+    border-radius: 2px; overflow: hidden; margin: 0 auto;
+  }
+  .loader-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #60a5fa, #22d3ee);
+    border-radius: 2px; width: 0;
+    animation: loadFill 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+  @keyframes loadFill { 0% { width: 0; } 100% { width: 100%; } }
+
+  /* ДЫМ */
+  .smoke-container {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 1; overflow: hidden;
+    transition: opacity 0.8s;
+  }
+  .smoke {
+    position: absolute; width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(96,165,250,0.08), transparent 70%);
+    filter: blur(40px);
+    animation: smokeFloat linear infinite;
+  }
+  @keyframes smokeFloat {
+    0% { transform: translate(0, 0) scale(1); opacity: 0; }
+    20% { opacity: 0.7; }
+    80% { opacity: 0.7; }
+    100% { transform: translate(60px, -80px) scale(1.5); opacity: 0; }
+  }
+
+  /* НАВИГАЦИЯ */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(6,21,43,0.85);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 40px;
+    padding-top: calc(18px + env(safe-area-inset-top));
+    display: flex; justify-content: space-between; align-items: center;
+    animation: slideDown 0.8s ease;
+    transition: background 0.4s, border-color 0.4s;
+    gap: 12px;
+  }
+  body.light-theme nav { background: rgba(255,255,255,0.85); }
+  body.apple-theme nav {
+    background: rgba(255,255,255,0.92);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 14px 40px;
+    padding-top: calc(14px + env(safe-area-inset-top));
+  }
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .logo {
+    font-size: 1.8rem; font-weight: 800; letter-spacing: 4px;
+    background: linear-gradient(90deg, #60a5fa, #22d3ee, #93c5fd, #60a5fa);
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmerText 4s linear infinite; cursor: pointer;
+    transition: all 0.4s; flex-shrink: 0;
+  }
+  body.apple-theme .logo {
+    background: none;
+    -webkit-text-fill-color: #1d1d1f; color: #1d1d1f;
+    animation: none; letter-spacing: 2px;
+    font-weight: 600; font-size: 1.4rem;
+  }
+
+  .nav-links { display: flex; gap: 25px; list-style: none; align-items: center; }
+  .nav-links a {
+    color: var(--text-dim); text-decoration: none; font-size: 0.95rem;
+    font-weight: 500; transition: color 0.3s; position: relative;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-links a:hover { color: var(--accent-2); }
+  body.apple-theme .nav-links a { font-size: 0.85rem; }
+  body.apple-theme .nav-links a:hover { color: #1d1d1f; }
+  .nav-links a .brand-dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; opacity: 0.6; transition: all 0.3s;
+  }
+  .nav-links a:hover .brand-dot { opacity: 1; box-shadow: 0 0 8px currentColor; }
+  body.apple-theme .nav-links a .brand-dot { display: none; }
+
+  .nav-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+  .theme-toggle, .sound-toggle {
+    background: rgba(96,165,250,0.15);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 42px; height: 42px; border-radius: 12px;
+    cursor: pointer; font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; flex-shrink: 0;
+  }
+  .theme-toggle:hover { background: rgba(96,165,250,0.3); transform: rotate(180deg); }
+  .sound-toggle:hover { background: rgba(96,165,250,0.3); }
+  .sound-toggle.muted { opacity: 0.4; }
+  body.apple-theme .theme-toggle,
+  body.apple-theme .sound-toggle {
+    background: transparent; border: 1px solid rgba(0,0,0,0.1);
+    color: #1d1d1f; border-radius: 50%;
+    width: 36px; height: 36px; font-size: 1rem;
+  }
+  body.apple-theme .theme-toggle:hover,
+  body.apple-theme .sound-toggle:hover { background: rgba(0,0,0,0.04); }
+
+  .cart-btn {
+    position: relative;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    border: none; color: #fff; padding: 10px 20px; border-radius: 12px;
+    cursor: pointer; font-weight: 600; font-size: 0.95rem;
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.3s; box-shadow: 0 4px 20px var(--glow);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .cart-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--glow); }
+  body.apple-theme .cart-btn {
+    background: #0071e3; box-shadow: none;
+    border-radius: 980px; padding: 8px 18px; font-size: 0.85rem;
+  }
+  body.apple-theme .cart-btn:hover { background: #0077ed; transform: none; }
+
+  .cart-count {
+    background: #fff; color: var(--bg-2); font-size: 0.75rem; font-weight: 800;
+    min-width: 20px; height: 20px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; padding: 0 6px;
+  }
+  body.apple-theme .cart-count { background: rgba(255,255,255,0.25); color: #fff; }
+  .cart-count.bump { animation: bump 0.4s ease; }
+  @keyframes bump {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+  }
+
+  /* BOOK */
+  .book-container {
+    position: relative; max-width: 1300px;
+    margin: 40px auto; padding: 0 20px;
+    perspective: 2500px; z-index: 2;
+  }
+
+  .book { position: relative; width: 100%; transform-style: preserve-3d; }
+
+  .page {
+    position: relative; width: 100%;
+    transform-style: preserve-3d;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    will-change: transform, opacity;
+    transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.7s ease;
+  }
+  .page.hidden { display: none; }
+
+  .page.slide-out-left { transform: translateX(-120%) scale(0.85); opacity: 0; }
+  .page.slide-in-right { transform: translateX(120%) scale(0.85); opacity: 0; }
+  .page.slide-out-right { transform: translateX(120%) scale(0.85); opacity: 0; }
+  .page.slide-in-left { transform: translateX(-120%) scale(0.85); opacity: 0; }
+
+  /* BRAND HEADER */
+  .brand-header {
+    position: relative; text-align: center;
+    padding: 40px 20px 30px; margin-bottom: 20px;
+    overflow: hidden;
+    animation: brandEnter 1s cubic-bezier(0.25, 1, 0.5, 1) backwards;
+    animation-delay: 0.2s;
+  }
+  @keyframes brandEnter {
+    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .brand-logo-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 18px; margin-bottom: 12px;
+  }
+  body.apple-theme .brand-logo-row { gap: 10px; margin-bottom: 8px; }
+  .brand-symbol {
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    filter: drop-shadow(0 4px 20px var(--glow));
+    animation: brandFloat 4s ease-in-out infinite;
+  }
+  body.apple-theme .brand-symbol {
+    width: 36px; height: 36px; filter: none; animation: none;
+  }
+  @keyframes brandFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .brand-name {
+    font-size: 4rem; font-weight: 900;
+    letter-spacing: 12px; line-height: 1;
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmerText 5s linear infinite;
+    text-transform: uppercase; cursor: default; transition: all 0.6s;
+  }
+  body.apple-theme .brand-name {
+    font-size: 3rem; font-weight: 600;
+    letter-spacing: -1px; text-transform: none;
+    animation: none;
+    -webkit-text-fill-color: #1d1d1f; color: #1d1d1f;
+  }
+  body.apple-theme .brand-header.apple .brand-name {
+    background-image: none; -webkit-text-fill-color: #1d1d1f;
+  }
+  body.apple-theme .brand-header.samsung .brand-name {
+    background-image: none; -webkit-text-fill-color: #1d1d1f;
+  }
+  body.apple-theme .brand-header.apple .brand-symbol,
+  body.apple-theme .brand-header.samsung .brand-symbol { color: #1d1d1f; }
+
+  .brand-header.apple .brand-name {
+    background-image: linear-gradient(90deg, #e2e8f0, #93c5fd, #67e8f9, #e2e8f0, #93c5fd);
+  }
+  .brand-header.apple .brand-symbol { color: #e2e8f0; }
+  body.light-theme .brand-header.apple .brand-name {
+    background-image: linear-gradient(90deg, #0a2540, #3b82f6, #0891b2, #0a2540, #3b82f6);
+  }
+  body.light-theme .brand-header.apple .brand-symbol { color: #0a2540; }
+
+  .brand-header.samsung .brand-name {
+    background-image: linear-gradient(90deg, #60a5fa, #22d3ee, #3b82f6, #60a5fa, #22d3ee);
+  }
+  .brand-header.samsung .brand-symbol { color: #22d3ee; }
+
+  .brand-tagline {
+    font-size: 1rem; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--text-dim); opacity: 0.8; margin-bottom: 20px;
+    transition: all 0.6s;
+  }
+  body.apple-theme .brand-tagline {
+    font-size: 1.4rem; letter-spacing: 0;
+    text-transform: none; color: #6e6e73; opacity: 1;
+    margin-bottom: 24px; font-weight: 400;
+  }
+  .brand-divider {
+    display: flex; align-items: center; justify-content: center;
+    gap: 15px; margin: 0 auto; max-width: 400px;
+  }
+  body.apple-theme .brand-divider { max-width: 200px; opacity: 0.4; }
+  .brand-divider-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .brand-divider-icon { color: var(--accent-2); font-size: 1rem; opacity: 0.8; }
+  body.apple-theme .brand-divider-icon { color: #1d1d1f; }
+
+  .brand-glow {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px; height: 200px;
+    background: radial-gradient(ellipse, var(--glow), transparent 70%);
+    filter: blur(40px); pointer-events: none;
+    animation: brandGlowPulse 5s ease-in-out infinite;
+    transition: opacity 0.8s;
+  }
+  @keyframes brandGlowPulse {
+    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15); }
+  }
+
+  .section-subtitle {
+    color: var(--text-dim); font-size: 0.95rem; text-align: center;
+    margin-bottom: 20px; transition: all 0.6s;
+    padding: 0 16px;
+  }
+  body.apple-theme .section-subtitle {
+    font-size: 1.05rem; color: #6e6e73;
+    max-width: 600px; margin: 0 auto 40px; line-height: 1.5;
+  }
+
+  /* GRID */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px; padding: 20px 0 40px;
+  }
+  body.apple-theme .product-grid { gap: 20px; padding: 40px 0; }
+
+  /* КАРТОЧКА */
+  .product-card {
+    background: linear-gradient(145deg, var(--card-1), var(--card-2));
+    border: 1px solid var(--border);
+    border-radius: 24px; padding: 25px 20px 25px;
+    text-align: center;
+    transition: all 0.5s cubic-bezier(0.25,1,0.5,1);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    position: relative; cursor: pointer;
+    animation: cardEnter 0.6s ease backwards;
+  }
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .product-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent-2);
+    box-shadow: 0 25px 60px var(--glow), 0 0 40px rgba(34,211,238,0.2);
+  }
+  body.apple-theme .product-card {
+    background: #fff; border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 18px; padding: 40px 24px 30px;
+    backdrop-filter: none;
+  }
+  body.apple-theme .product-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0,0,0,0.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .view-more {
+    position: absolute; top: 14px; right: 14px;
+    background: rgba(34,211,238,0.15);
+    border: 1px solid rgba(34,211,238,0.4);
+    color: var(--accent-2);
+    font-size: 0.7rem; padding: 5px 10px;
+    border-radius: 10px; letter-spacing: 0.5px;
+    opacity: 0; transform: translateY(-5px);
+    transition: all 0.3s; pointer-events: none; z-index: 5;
+  }
+  .product-card:hover .view-more { opacity: 1; transform: translateY(0); }
+  body.apple-theme .view-more {
+    background: transparent; border: none;
+    color: #0071e3; font-size: 0.8rem; top: 16px; right: 16px;
+  }
+  body.apple-theme .view-more::after { content: ' →'; }
+
+  /* 3D СЦЕНА */
+  .phone-scene {
+    width: 200px; height: 310px;
+    perspective: 1200px;
+    margin: 0 auto 35px;
+    cursor: grab; position: relative;
+    touch-action: none;
+    transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform; z-index: 3;
+  }
+  .product-card:hover .phone-scene { transform: translateY(-30px) scale(1.08); }
+  body.apple-theme .product-card:hover .phone-scene { transform: translateY(-8px) scale(1.02); }
+  .phone-scene:active { cursor: grabbing; }
+
+  .phone-scene::after {
+    content: '';
+    position: absolute;
+    bottom: -25px; left: 50%;
+    transform: translateX(-50%) scale(1);
+    width: 140px; height: 16px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.55), transparent 70%);
+    border-radius: 50%; opacity: 0.5;
+    transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: -1; pointer-events: none;
+  }
+  body.apple-theme .phone-scene::after {
+    background: radial-gradient(ellipse, rgba(0,0,0,0.12), transparent 70%);
+    opacity: 0.6;
+  }
+  .product-card:hover .phone-scene::after {
+    opacity: 0.25;
+    transform: translateX(-50%) scale(0.6);
+    bottom: -10px; filter: blur(6px);
+  }
+  body.apple-theme .product-card:hover .phone-scene::after { opacity: 0.5; }
+
+  .phone-model {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transform: rotateX(-5deg) rotateY(-15deg);
+  }
+
+  .phone-side {
+    position: absolute; inset: 0;
+    border-radius: 32px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(180,200,220,0.15);
+    transition: box-shadow 0.5s ease;
+  }
+  body.apple-theme .phone-side {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.05);
+  }
+  .product-card:hover .phone-side {
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 40px var(--glow), 0 0 0 1px rgba(180,200,220,0.25);
+  }
+  body.apple-theme .product-card:hover .phone-side {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.08);
+  }
+
+  .phone-side svg { width: 100%; height: 100%; display: block; }
+  .phone-front { transform: rotateY(180deg) translateZ(6px); }
+  .phone-back { transform: translateZ(6px); }
+
+  .phone-side::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.15) 45%, transparent 55%);
+    pointer-events: none; border-radius: 32px; transition: opacity 0.4s;
+  }
+  body.apple-theme .phone-side::after { opacity: 0.4; }
+
+  .drag-hint {
+    position: absolute; bottom: -22px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem; color: var(--accent-1); opacity: 0.7;
+    white-space: nowrap; pointer-events: none;
+    animation: pulseHint 2s ease-in-out infinite;
+    transition: opacity 0.4s;
+  }
+  body.apple-theme .drag-hint { color: #86868b; animation: none; opacity: 0.8; }
+  @keyframes pulseHint {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+  }
+  .product-card:hover .drag-hint { opacity: 0.9; }
+
+  .product-name {
+    font-size: 1.15rem; font-weight: 700; color: var(--text);
+    margin-bottom: 5px; position: relative; z-index: 2;
+    transition: color 0.3s; font-family: 'Courier New', monospace;
+  }
+  body.apple-theme .product-name {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 1.3rem; font-weight: 600;
+    color: #1d1d1f; margin-bottom: 8px; letter-spacing: -0.2px;
+  }
+  .product-card:hover .product-name { color: var(--accent-2); }
+  body.apple-theme .product-card:hover .product-name { color: #1d1d1f; }
+
+  .product-specs {
+    font-size: 0.8rem; color: var(--text-dim); margin-bottom: 12px;
+    position: relative; z-index: 2; transition: all 0.3s;
+  }
+  body.apple-theme .product-specs { font-size: 0.9rem; color: #86868b; margin-bottom: 16px; }
+
+  .product-price {
+    font-size: 1.4rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px; position: relative; z-index: 2;
+    transition: all 0.3s;
+  }
+  body.apple-theme .product-price {
+    background: none;
+    -webkit-text-fill-color: #1d1d1f; color: #1d1d1f;
+    font-size: 1.2rem; font-weight: 500; margin-bottom: 20px;
+  }
+
+  .add-btn {
+    width: 100%; padding: 12px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    border: none; border-radius: 12px; color: #fff;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    transition: all 0.3s; position: relative; z-index: 2;
+    overflow: hidden;
+    min-height: 44px;
+  }
+  .add-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%); transition: transform 0.6s;
+  }
+  .add-btn:hover::before { transform: translateX(100%); }
+  .add-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px var(--glow); }
+  .add-btn.added { background: linear-gradient(135deg, #10b981, var(--accent-2)); }
+  body.apple-theme .add-btn {
+    background: transparent;
+    border: 1px solid #0071e3;
+    color: #0071e3;
+    border-radius: 980px;
+    padding: 10px 20px; font-size: 0.9rem; font-weight: 400;
+  }
+  body.apple-theme .add-btn::before { display: none; }
+  body.apple-theme .add-btn:hover { background: #0071e3; color: #fff; transform: none; box-shadow: none; }
+  body.apple-theme .add-btn.added { background: #1d1d1f; border-color: #1d1d1f; color: #fff; }
+
+  /* COMPARE */
+  .compare-dock {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(200px);
+    background: rgba(6,21,43,0.95);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 15px 20px;
+    display: flex; gap: 15px; align-items: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px var(--glow);
+    z-index: 90;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), background 0.4s;
+    max-width: calc(100vw - 32px);
+  }
+  body.light-theme .compare-dock { background: rgba(255,255,255,0.95); }
+  body.apple-theme .compare-dock {
+    background: rgba(255,255,255,0.98);
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  }
+  .compare-dock.active { transform: translateX(-50%) translateY(0); }
+
+  .compare-slot {
+    width: 100px; height: 130px; border-radius: 12px;
+    background: rgba(96,165,250,0.1);
+    border: 2px dashed var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: var(--text-dim);
+    position: relative; transition: all 0.3s; overflow: hidden;
+  }
+  body.apple-theme .compare-slot {
+    background: rgba(0,0,0,0.02);
+    border: 1.5px dashed rgba(0,0,0,0.12);
+    border-radius: 10px;
+  }
+  .compare-slot.filled {
+    border-style: solid; border-color: var(--accent-2);
+    background: rgba(34,211,238,0.1);
+    box-shadow: 0 0 20px var(--glow);
+  }
+  body.apple-theme .compare-slot.filled {
+    border: 1px solid rgba(0,0,0,0.1); background: #fff; box-shadow: none;
+  }
+  .compare-slot .slot-phone {
+    width: 90%; height: 95%; border-radius: 10px;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    border: 1px solid rgba(180,200,220,0.4);
+  }
+  .compare-slot .slot-label {
+    position: absolute; bottom: 4px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem; color: var(--text-dim); white-space: nowrap;
+  }
+  body.apple-theme .compare-slot .slot-label { color: #86868b; }
+  .compare-empty-hint {
+    text-align: center; color: var(--text-dim);
+    font-size: 0.7rem; line-height: 1.3; padding: 5px;
+  }
+  .compare-vs {
+    color: var(--accent-2); font-weight: 900;
+    font-size: 1.2rem; letter-spacing: 2px;
+  }
+  body.apple-theme .compare-vs { color: #1d1d1f; font-weight: 400; font-size: 1rem; }
+  .compare-close {
+    background: rgba(239,68,68,0.2);
+    border: 1px solid rgba(239,68,68,0.4);
+    color: #fca5a5; width: 32px; height: 32px;
+    border-radius: 10px; cursor: pointer; font-size: 1.1rem;
+    transition: all 0.3s; flex-shrink: 0;
+  }
+  .compare-close:hover { background: rgba(239,68,68,0.4); transform: rotate(90deg); }
+  body.apple-theme .compare-close {
+    background: transparent; border: 1px solid rgba(0,0,0,0.1);
+    color: #1d1d1f; border-radius: 50%;
+  }
+  body.apple-theme .compare-close:hover { background: rgba(0,0,0,0.05); }
+  .compare-info {
+    color: var(--text-dim); font-size: 0.8rem;
+    max-width: 150px; line-height: 1.4;
+  }
+  body.apple-theme .compare-info { color: #6e6e73; }
+
+  .compare-check {
+    position: absolute; top: 14px; left: 14px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(96,165,250,0.15);
+    border: 1.5px solid var(--border);
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 0.85rem; color: var(--text-dim);
+    transition: all 0.3s; z-index: 6;
+  }
+  .compare-check:hover { background: rgba(34,211,238,0.25); border-color: var(--accent-2); }
+  .compare-check.checked {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    border-color: var(--accent-2); color: #fff;
+    box-shadow: 0 0 15px var(--glow);
+  }
+  body.apple-theme .compare-check {
+    background: transparent; border: 1px solid rgba(0,0,0,0.12);
+    color: #86868b; width: 22px; height: 22px; font-size: 0.75rem;
+  }
+  body.apple-theme .compare-check:hover { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.2); }
+  body.apple-theme .compare-check.checked {
+    background: #0071e3; border-color: #0071e3; color: #fff; box-shadow: none;
+  }
+
+  /* PAGE CONTROLS */
+  .page-controls {
+    display: flex; justify-content: center; align-items: center;
+    gap: 30px; padding: 20px 0 60px;
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+    position: relative; z-index: 5;
+  }
+  .page-btn {
+    background: rgba(30,58,138,0.4);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 14px 28px; border-radius: 14px;
+    cursor: pointer; font-weight: 600; font-size: 0.95rem;
+    display: flex; align-items: center; gap: 10px;
+    transition: all 0.35s;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    min-height: 44px;
+  }
+  .page-btn:hover:not(:disabled) {
+    background: rgba(59,130,246,0.35);
+    border-color: var(--accent-2); color: var(--accent-2);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px var(--glow);
+  }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  body.apple-theme .page-btn {
+    background: transparent;
+    border: 1px solid rgba(0,0,0,0.1);
+    color: #1d1d1f; border-radius: 980px;
+    padding: 10px 22px; font-size: 0.9rem;
+    font-weight: 400; backdrop-filter: none;
+  }
+  body.apple-theme .page-btn:hover:not(:disabled) {
+    background: #1d1d1f; color: #fff;
+    border-color: #1d1d1f; transform: none; box-shadow: none;
+  }
+  body.apple-theme .page-btn:disabled { opacity: 0.3; }
+
+  .page-indicator {
+    display: flex; gap: 12px; align-items: center;
+    padding: 10px 20px;
+    background: rgba(30,58,138,0.3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  body.apple-theme .page-indicator {
+    background: transparent; border: none; padding: 0; gap: 8px;
+  }
+  .page-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(96,165,250,0.3);
+    transition: all 0.4s; cursor: pointer;
+  }
+  body.apple-theme .page-dot {
+    background: rgba(0,0,0,0.15); width: 6px; height: 6px;
+  }
+  .page-dot.active {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    box-shadow: 0 0 12px var(--accent-2);
+    transform: scale(1.3);
+    width: 28px; border-radius: 5px;
+  }
+  body.apple-theme .page-dot.active {
+    background: #1d1d1f; box-shadow: none;
+    transform: none;
+    width: 20px; height: 6px; border-radius: 3px;
+  }
+
+  /* МОРФИНГ-ОВЕРЛЕЙ */
+  .transition-overlay {
+    position: fixed; inset: 0;
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .transition-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .transition-overlay::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(6,21,43,0.55);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  body.light-theme .transition-overlay::before { background: rgba(240,249,255,0.7); }
+  body.apple-theme .transition-overlay::before { background: rgba(255,255,255,0.85); }
+  .transition-overlay.active::before { opacity: 1; }
+
+  .transition-logo-wrap {
+    position: relative;
+    width: 220px; height: 220px;
+    display: flex; align-items: center; justify-content: center;
+    transform: scale(0.5);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
+  }
+  .transition-overlay.active .transition-logo-wrap {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .transition-apple {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #e2e8f0;
+    filter: drop-shadow(0 0 30px rgba(147,197,253,0.9)) drop-shadow(0 0 60px rgba(34,211,238,0.6));
+    transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  body.apple-theme .transition-apple { color: #1d1d1f; }
+
+  .transition-samsung {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+    opacity: 0;
+    transform: scale(1.4) rotate(-15deg);
+  }
+  .transition-samsung .s-circle {
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e3a8a, #0891b2);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(34,211,238,0.8), 0 0 80px rgba(59,130,246,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+  .transition-samsung .s-circle::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: conic-gradient(from 0deg, transparent, rgba(34,211,238,0.6), transparent 30%);
+    animation: rotateGlow 2s linear infinite;
+  }
+  @keyframes rotateGlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .transition-samsung .s-letter {
+    font-size: 7rem;
+    font-weight: 900;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(255,255,255,0.9);
+    position: relative;
+    z-index: 2;
+    line-height: 1;
+    transform: translateY(-8px);
+  }
+
+  .transition-overlay.morph-to-samsung .transition-apple {
+    opacity: 0;
+    transform: scale(0.4) rotate(45deg);
+  }
+  .transition-overlay.morph-to-samsung .transition-samsung {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  .transition-overlay.morph-to-apple .transition-apple {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  .transition-overlay.morph-to-apple .transition-samsung {
+    opacity: 0;
+    transform: scale(1.4) rotate(15deg);
+  }
+
+  .transition-pulse {
+    position: absolute;
+    inset: -40px;
+    border-radius: 50%;
+    border: 2px solid rgba(34,211,238,0.6);
+    opacity: 0;
+  }
+  .transition-overlay.active .transition-pulse {
+    animation: pulseRing 1.4s ease-out infinite;
+  }
+  @keyframes pulseRing {
+    0% { transform: scale(0.6); opacity: 0.9; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  .transition-pulse.delay-1 { animation-delay: 0.3s !important; border-color: rgba(59,130,246,0.6); }
+  .transition-pulse.delay-2 { animation-delay: 0.6s !important; border-color: rgba(147,197,253,0.5); }
+
+  .transition-label {
+    position: absolute;
+    bottom: -60px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.2rem;
+    letter-spacing: 8px;
+    font-weight: 700;
+    color: #e0f2fe;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.4s 0.2s;
+    white-space: nowrap;
+  }
+  body.light-theme .transition-label { color: #0a2540; }
+  body.apple-theme .transition-label {
+    color: #1d1d1f;
+    font-weight: 500;
+    letter-spacing: 4px;
+    font-size: 1rem;
+  }
+  .transition-overlay.morph-to-samsung .transition-label,
+  .transition-overlay.morph-to-apple .transition-label {
+    opacity: 1;
+  }
+
+  /* MODAL */
+  .product-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(6,21,43,0.85);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    z-index: 150;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; visibility: hidden;
+    transition: all 0.4s ease;
+  }
+  body.light-theme .product-modal-overlay { background: rgba(200,220,240,0.7); }
+  body.apple-theme .product-modal-overlay { background: rgba(0,0,0,0.5); }
+  .product-modal-overlay.active { opacity: 1; visibility: visible; }
+
+  .product-modal {
+    background: linear-gradient(145deg, var(--bg-2) 0%, var(--bg-1) 60%, var(--bg-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    width: 100%; max-width: 900px; max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto; position: relative;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 60px var(--glow);
+    transform: scale(0.9) translateY(30px);
+    transition: transform 0.5s cubic-bezier(0.25,1,0.5,1), background 0.4s;
+  }
+  body.apple-theme .product-modal {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    border-radius: 20px;
+  }
+  .product-modal-overlay.active .product-modal { transform: scale(1) translateY(0); }
+
+  .modal-close {
+    position: absolute; top: 18px; right: 18px;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(96,165,250,0.15);
+    border: 1px solid var(--border);
+    color: var(--text-dim); font-size: 1.6rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; z-index: 10; line-height: 1;
+  }
+  .modal-close:hover {
+    background: rgba(239,68,68,0.25);
+    border-color: rgba(239,68,68,0.5);
+    color: #fca5a5; transform: rotate(90deg);
+  }
+  body.apple-theme .modal-close {
+    background: rgba(0,0,0,0.05); border: none;
+    color: #86868b; width: 36px; height: 36px; font-size: 1.3rem;
+  }
+  body.apple-theme .modal-close:hover { background: rgba(0,0,0,0.1); color: #1d1d1f; transform: none; }
+
+  .product-modal-content {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 40px; padding: 50px 45px;
+  }
+  body.apple-theme .product-modal-content { padding: 60px 50px; }
+  .modal-phone-visual {
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 20px;
+  }
+  .modal-phone-scene {
+    width: 220px; height: 350px;
+    perspective: 1400px; cursor: grab; position: relative;
+    touch-action: none;
+  }
+  .modal-phone-scene:active { cursor: grabbing; }
+  .modal-phone-model {
+    width: 100%; height: 100%;
+    position: relative; transform-style: preserve-3d;
+    will-change: transform;
+    transform: rotateX(-5deg) rotateY(-15deg);
+  }
+
+  .splash-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    border: none; border-radius: 10px; color: #fff;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px var(--glow);
+    display: flex; align-items: center; gap: 8px;
+    min-height: 40px;
+  }
+  .splash-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--glow); }
+  .splash-btn.playing { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  body.apple-theme .splash-btn {
+    background: transparent; border: 1px solid #0071e3;
+    color: #0071e3; box-shadow: none; border-radius: 980px;
+    padding: 8px 18px; font-size: 0.85rem; font-weight: 400;
+  }
+  body.apple-theme .splash-btn:hover { background: #0071e3; color: #fff; transform: none; box-shadow: none; }
+  body.apple-theme .splash-btn.playing { background: #1d1d1f; border-color: #1d1d1f; color: #fff; }
+
+  .modal-info { position: relative; z-index: 2; }
+  .modal-category {
+    display: inline-block;
+    font-size: 0.75rem; letter-spacing: 3px;
+    color: var(--accent-2); text-transform: uppercase;
+    margin-bottom: 12px; padding: 5px 12px;
+    background: rgba(34,211,238,0.1);
+    border: 1px solid rgba(34,211,238,0.3);
+    border-radius: 8px;
+  }
+  body.apple-theme .modal-category {
+    background: transparent; border: none; padding: 0;
+    color: #0071e3; letter-spacing: 0.5px;
+    text-transform: none; font-size: 0.85rem; margin-bottom: 8px;
+  }
+  .modal-title {
+    font-size: 2rem; font-weight: 800;
+    color: var(--text); margin-bottom: 15px;
+    line-height: 1.2; transition: all 0.4s;
+  }
+  body.apple-theme .modal-title { font-size: 2.2rem; font-weight: 600; letter-spacing: -0.5px; color: #1d1d1f; }
+  .modal-rating {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .stars { color: #facc15; font-size: 1.1rem; letter-spacing: 2px; }
+  body.apple-theme .stars { color: #1d1d1f; }
+  .rating-text { color: var(--text-dim); font-size: 0.9rem; }
+  body.apple-theme .rating-text { color: #86868b; font-size: 0.85rem; }
+
+  .modal-description {
+    color: var(--text-dim); font-size: 0.95rem;
+    line-height: 1.7; margin-bottom: 25px;
+  }
+  body.apple-theme .modal-description { color: #6e6e73; font-size: 1rem; line-height: 1.6; }
+  .modal-specs-title {
+    font-size: 0.85rem; color: var(--accent-2);
+    text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 15px; font-weight: 600;
+  }
+  body.apple-theme .modal-specs-title {
+    color: #1d1d1f; text-transform: none;
+    letter-spacing: 0; font-size: 1rem; font-weight: 600;
+  }
+  .modal-specs {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 28px;
+  }
+  .spec-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: rgba(30,58,138,0.25);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.85rem; transition: all 0.3s;
+  }
+  body.light-theme .spec-item { background: rgba(255,255,255,0.6); }
+  body.apple-theme .spec-item {
+    background: #fafafa; border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .spec-item:hover {
+    background: rgba(30,58,138,0.4);
+    border-color: var(--accent-2);
+    transform: translateX(3px);
+  }
+  body.apple-theme .spec-item:hover { background: #f5f5f7; border-color: rgba(0,0,0,0.08); transform: none; }
+  .spec-icon { font-size: 1.1rem; flex-shrink: 0; }
+  body.apple-theme .spec-icon { font-size: 1rem; }
+  .spec-text { color: var(--text); }
+  body.apple-theme .spec-text { color: #1d1d1f; }
+  .spec-label { color: var(--text-dim); font-size: 0.75rem; display: block; margin-bottom: 2px; }
+  body.apple-theme .spec-label { color: #86868b; font-size: 0.75rem; }
+
+  .modal-price-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  body.apple-theme .modal-price-row { border-top: 1px solid rgba(0,0,0,0.08); }
+  .modal-price {
+    font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  body.apple-theme .modal-price {
+    background: none; -webkit-text-fill-color: #1d1d1f;
+    color: #1d1d1f; font-size: 1.6rem; font-weight: 600;
+  }
+  .modal-old-price {
+    font-size: 1rem; color: #64748b;
+    text-decoration: line-through; margin-left: 10px;
+  }
+  body.apple-theme .modal-old-price { color: #86868b; font-size: 0.9rem; }
+  .modal-add-btn {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    border: none; border-radius: 14px; color: #fff;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 30px var(--glow);
+    white-space: nowrap;
+    min-height: 44px;
+  }
+  .modal-add-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 40px var(--glow); }
+  body.apple-theme .modal-add-btn {
+    background: #0071e3; border-radius: 980px;
+    padding: 12px 28px; font-size: 0.95rem;
+    font-weight: 400; box-shadow: none;
+  }
+  body.apple-theme .modal-add-btn:hover { background: #0077ed; transform: none; box-shadow: none; }
+
+  /* ЗАСТАВКА */
+  .splash-overlay {
+    position: absolute; inset: 0;
+    border-radius: 32px; overflow: hidden;
+    z-index: 20; display: none;
+    align-items: center; justify-content: center;
+    background: #000;
+  }
+  .splash-overlay.playing { display: flex; }
+
+  .splash-apple { background: #000; }
+  .splash-apple .splash-logo {
+    width: 60px; height: 60px; color: #fff;
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.8));
+    animation: applePulse 1.6s ease-in-out infinite;
+  }
+  @keyframes applePulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+  .splash-apple::after {
+    content: ''; position: absolute;
+    bottom: 40px; width: 100px; height: 3px;
+    background: #fff; border-radius: 2px;
+    animation: appleBar 2.4s ease-in-out infinite;
+  }
+  @keyframes appleBar {
+    0% { transform: scaleX(0.1); opacity: 0.3; }
+    50% { transform: scaleX(1); opacity: 1; }
+    100% { transform: scaleX(0.1); opacity: 0.3; }
+  }
+
+  .splash-samsung { background: linear-gradient(135deg, #06152b, #0a2540, #1e3a8a); }
+  .splash-samsung .splash-logo {
+    font-size: 2.6rem; font-weight: 900;
+    letter-spacing: 4px; color: #fff;
+    text-shadow: 0 0 30px rgba(34,211,238,0.9), 0 0 60px rgba(34,211,238,0.5);
+    animation: samsungGlow 1.8s ease-in-out infinite;
+    font-family: 'Arial', sans-serif; text-transform: uppercase;
+  }
+  @keyframes samsungGlow {
+    0%, 100% { opacity: 0.7; letter-spacing: 4px; }
+    50% { opacity: 1; letter-spacing: 6px; }
+  }
+  .splash-samsung::before {
+    content: ''; position: absolute;
+    top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(34,211,238,0.4), transparent);
+    animation: samsungWave 2.4s ease-in-out infinite;
+  }
+  @keyframes samsungWave { 0% { left: -100%; } 100% { left: 100%; } }
+
+  /* CART */
+  .cart-overlay {
+    position: fixed; inset: 0;
+    background: rgba(6,21,43,0.7);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    opacity: 0; visibility: hidden;
+    transition: all 0.4s ease; z-index: 100;
+  }
+  .cart-overlay.active { opacity: 1; visibility: visible; }
+  .cart-panel {
+    position: fixed; top: 0; right: 0;
+    width: 420px; max-width: 100%; height: 100%;
+    height: 100dvh;
+    background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 100%);
+    border-left: 1px solid var(--border);
+    transform: translateX(100%);
+    transition: transform 0.5s cubic-bezier(0.25,1,0.5,1), background 0.4s;
+    z-index: 101; display: flex; flex-direction: column;
+    box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+  }
+  body.apple-theme .cart-panel {
+    background: #fff; border-left: 1px solid rgba(0,0,0,0.08);
+    box-shadow: -10px 0 40px rgba(0,0,0,0.08);
+  }
+  .cart-panel.active { transform: translateX(0); }
+  .cart-header {
+    padding: 25px 30px;
+    padding-top: calc(25px + env(safe-area-inset-top));
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  body.apple-theme .cart-header { border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .cart-header h2 { font-size: 1.4rem; color: var(--text); font-weight: 700; }
+  body.apple-theme .cart-header h2 { font-weight: 600; font-size: 1.3rem; }
+  .close-cart {
+    background: none; border: none; color: var(--text-dim);
+    font-size: 1.8rem; cursor: pointer; transition: all 0.3s;
+    line-height: 1; width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .close-cart:hover { color: var(--accent-2); background: rgba(96,165,250,0.15); transform: rotate(90deg); }
+  body.apple-theme .close-cart:hover { color: #1d1d1f; background: rgba(0,0,0,0.05); transform: none; }
+  .cart-items {
+    flex: 1; overflow-y: auto; padding: 20px 30px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cart-empty { text-align: center; color: var(--text-dim); padding: 60px 20px; }
+  .cart-empty-icon { font-size: 3rem; display: block; margin-bottom: 15px; opacity: 0.6; }
+  .cart-item {
+    display: flex; gap: 15px; padding: 15px;
+    background: rgba(30,58,138,0.25);
+    border: 1px solid var(--border);
+    border-radius: 16px; margin-bottom: 12px;
+    animation: itemSlide 0.4s ease;
+  }
+  body.light-theme .cart-item { background: rgba(255,255,255,0.6); }
+  body.apple-theme .cart-item {
+    background: #fafafa; border: 1px solid rgba(0,0,0,0.05); border-radius: 12px;
+  }
+  @keyframes itemSlide {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .cart-item-thumb {
+    width: 60px; height: 80px; border-radius: 10px;
+    flex-shrink: 0; overflow: hidden;
+    border: 1px solid var(--border);
+    background: #0a0e1a; position: relative;
+  }
+  body.apple-theme .cart-item-thumb { background: #f5f5f7; border: 1px solid rgba(0,0,0,0.05); }
+  .cart-item-thumb svg { width: 100%; height: 100%; }
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-name { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  body.apple-theme .cart-item-name { font-weight: 600; font-size: 0.9rem; }
+  .cart-item-price { font-size: 0.9rem; color: var(--accent-2); font-weight: 700; }
+  body.apple-theme .cart-item-price { color: #1d1d1f; font-weight: 500; font-size: 0.85rem; }
+  .cart-item-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .qty-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(96,165,250,0.15);
+    border: 1px solid var(--border);
+    color: var(--text-dim); font-size: 1rem; cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .qty-btn:hover { background: rgba(96,165,250,0.3); color: var(--accent-2); }
+  body.apple-theme .qty-btn {
+    background: #fff; border: 1px solid rgba(0,0,0,0.1);
+    color: #1d1d1f; border-radius: 50%; width: 30px; height: 30px;
+  }
+  body.apple-theme .qty-btn:hover { background: rgba(0,0,0,0.05); color: #1d1d1f; }
+  .qty-value { min-width: 24px; text-align: center; font-weight: 600; color: var(--text); }
+  .remove-item {
+    background: none; border: none; color: #f87171;
+    font-size: 1.2rem; cursor: pointer; padding: 6px;
+    transition: all 0.2s; align-self: flex-start;
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .remove-item:hover { transform: scale(1.2); }
+  body.apple-theme .remove-item { color: #86868b; font-size: 1rem; }
+  body.apple-theme .remove-item:hover { color: #1d1d1f; transform: none; }
+  .cart-footer {
+    padding: 25px 30px;
+    padding-bottom: calc(25px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: rgba(6,21,43,0.6);
+  }
+  body.light-theme .cart-footer { background: rgba(255,255,255,0.6); }
+  body.apple-theme .cart-footer { background: #fff; border-top: 1px solid rgba(0,0,0,0.06); }
+  .cart-total {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; font-size: 1.1rem;
+  }
+  .cart-total-label { color: var(--text-dim); }
+  body.apple-theme .cart-total-label { color: #6e6e73; font-size: 0.9rem; }
+  .cart-total-value {
+    font-size: 1.6rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  body.apple-theme .cart-total-value {
+    background: none; -webkit-text-fill-color: #1d1d1f;
+    color: #1d1d1f; font-size: 1.4rem; font-weight: 600;
+  }
+  .checkout-btn {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    border: none; border-radius: 14px; color: #fff;
+    font-size: 1.05rem; font-weight: 700; cursor: pointer;
+    transition: all 0.3s; min-height: 52px;
+  }
+  .checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px var(--glow); }
+  body.apple-theme .checkout-btn {
+    background: #0071e3; border-radius: 980px;
+    font-size: 0.95rem; font-weight: 400; padding: 14px;
+  }
+  body.apple-theme .checkout-btn:hover { background: #0077ed; transform: none; box-shadow: none; }
+
+  .toast {
+    position: fixed;
+    bottom: calc(30px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff; padding: 16px 28px; border-radius: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 40px var(--glow);
+    z-index: 200; opacity: 0;
+    transition: all 0.4s cubic-bezier(0.25,1,0.5,1);
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid var(--border);
+    max-width: calc(100vw - 32px);
+    text-align: center;
+  }
+  body.apple-theme .toast {
+    background: #1d1d1f; border: none;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    border-radius: 12px; font-weight: 400; font-size: 0.9rem;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  footer {
+    text-align: center; padding: 40px 20px;
+    padding-bottom: calc(40px + env(safe-area-inset-bottom));
+    color: var(--text-dim); font-size: 0.9rem;
+    border-top: 1px solid var(--border);
+    position: relative; z-index: 2;
+    transition: all 0.4s;
+  }
+  body.apple-theme footer {
+    border-top: 1px solid rgba(0,0,0,0.06);
+    color: #86868b; font-size: 0.8rem; padding: 30px 20px;
+    padding-bottom: calc(30px + env(safe-area-inset-bottom));
+  }
+
+  /* =============================================
+     МОБИЛЬНАЯ АДАПТАЦИЯ
+     ============================================= */
+
+  @media (max-width: 1024px) {
+    .brand-name { font-size: 3.2rem; letter-spacing: 8px; }
+    .product-modal-content { padding: 40px 35px; gap: 30px; }
+  }
+
+  @media (max-width: 768px) {
+    nav {
+      padding: 12px 16px;
+      padding-top: calc(12px + env(safe-area-inset-top));
+      gap: 8px;
+    }
+    body.apple-theme nav {
+      padding: 10px 16px;
+      padding-top: calc(10px + env(safe-area-inset-top));
+    }
+    .logo { font-size: 1.3rem; letter-spacing: 2px; }
+    body.apple-theme .logo { font-size: 1.15rem; }
+    .nav-links { display: none; }
+    .nav-actions { gap: 6px; }
+    .theme-toggle, .sound-toggle {
+      width: 38px; height: 38px;
+      font-size: 1rem; border-radius: 10px;
+    }
+    body.apple-theme .theme-toggle,
+    body.apple-theme .sound-toggle {
+      width: 34px; height: 34px;
+    }
+    .cart-btn {
+      padding: 8px 14px; font-size: 0.85rem; gap: 6px;
+      border-radius: 10px;
+    }
+    body.apple-theme .cart-btn { padding: 7px 14px; font-size: 0.8rem; }
+    .cart-btn .cart-text { display: none; }
+    .cart-count { min-width: 18px; height: 18px; font-size: 0.7rem; }
+
+    .book-container {
+      margin: 20px auto; padding: 0 12px;
+    }
+
+    .brand-header { padding: 24px 12px 20px; margin-bottom: 10px; }
+    .brand-logo-row { gap: 12px; margin-bottom: 8px; }
+    .brand-symbol { width: 36px; height: 36px; }
+    .brand-symbol svg { width: 36px; height: 36px; }
+    .brand-name { font-size: 2.2rem; letter-spacing: 4px; }
+    body.apple-theme .brand-name { font-size: 1.9rem; letter-spacing: -0.5px; }
+    .brand-tagline { font-size: 0.75rem; letter-spacing: 3px; margin-bottom: 14px; }
+    body.apple-theme .brand-tagline { font-size: 1.05rem; letter-spacing: 0; }
+    .brand-divider { max-width: 240px; }
+    .brand-glow { width: 300px; height: 150px; filter: blur(30px); }
+
+    .section-subtitle {
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      padding: 0 12px;
+    }
+    body.apple-theme .section-subtitle { font-size: 0.9rem; margin-bottom: 24px; }
+
+    .product-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding: 10px 0 30px;
+    }
+    body.apple-theme .product-grid { padding: 20px 0; gap: 16px; }
+
+    .product-card {
+      padding: 20px 16px 20px;
+      border-radius: 20px;
+    }
+    body.apple-theme .product-card {
+      padding: 28px 18px 24px;
+      border-radius: 16px;
+    }
+
+    .view-more {
+      font-size: 0.6rem; padding: 4px 8px;
+      top: 12px; right: 12px;
+    }
+    body.apple-theme .view-more { font-size: 0.75rem; top: 14px; right: 14px; }
+
+    .phone-scene {
+      width: 170px; height: 265px;
+      margin: 0 auto 32px;
+    }
+    .product-card:hover .phone-scene {
+      transform: translateY(-16px) scale(1.05);
+    }
+    @media (hover: none) {
+      .product-card:active .phone-scene {
+        transform: translateY(-16px) scale(1.05);
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+    }
+    .phone-scene::after {
+      bottom: -20px; width: 120px; height: 14px;
+    }
+
+    .drag-hint { font-size: 0.6rem; bottom: -18px; }
+
+    .product-name { font-size: 1rem; margin-bottom: 4px; }
+    body.apple-theme .product-name { font-size: 1.15rem; }
+    .product-specs { font-size: 0.75rem; margin-bottom: 10px; }
+    body.apple-theme .product-specs { font-size: 0.85rem; margin-bottom: 12px; }
+    .product-price { font-size: 1.25rem; margin-bottom: 12px; }
+    body.apple-theme .product-price { font-size: 1.1rem; margin-bottom: 16px; }
+
+    .add-btn {
+      padding: 12px; font-size: 0.85rem;
+      min-height: 46px;
+      border-radius: 12px;
+    }
+    body.apple-theme .add-btn { padding: 10px 18px; font-size: 0.85rem; }
+
+    .compare-check {
+      width: 32px; height: 32px;
+      top: 10px; left: 10px;
+      font-size: 0.9rem;
+    }
+    body.apple-theme .compare-check { width: 28px; height: 28px; }
+
+    .page-controls {
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px 12px 40px;
+      padding-bottom: calc(40px + env(safe-area-inset-bottom));
+    }
+    .page-btn {
+      padding: 10px 18px; font-size: 0.8rem;
+      min-height: 42px; border-radius: 12px;
+      flex: 1;
+      min-width: 0;
+      justify-content: center;
+    }
+    .page-indicator {
+      padding: 8px 14px;
+      order: -1;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .product-modal-overlay {
+      padding: 0;
+      align-items: flex-end;
+    }
+    .product-modal {
+      max-width: 100%;
+      max-height: 92vh;
+      max-height: 92dvh;
+      border-radius: 24px 24px 0 0;
+      transform: translateY(100%);
+    }
+    body.apple-theme .product-modal {
+      border-radius: 20px 20px 0 0;
+    }
+    .product-modal-overlay.active .product-modal {
+      transform: translateY(0);
+    }
+    .product-modal-content {
+      grid-template-columns: 1fr;
+      padding: 24px 18px 24px;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      gap: 18px;
+    }
+    body.apple-theme .product-modal-content {
+      padding: 32px 20px;
+      padding-bottom: calc(32px + env(safe-area-inset-bottom));
+    }
+
+    .modal-close {
+      width: 40px; height: 40px;
+      top: 12px; right: 12px;
+      font-size: 1.4rem;
+      background: rgba(6,21,43,0.7);
+      backdrop-filter: blur(8px);
+    }
+    body.apple-theme .modal-close { width: 32px; height: 32px; font-size: 1.1rem; }
+
+    .modal-phone-visual { gap: 14px; }
+    .modal-phone-scene {
+      width: 150px; height: 235px;
+    }
+    .splash-btn {
+      padding: 10px 18px; font-size: 0.8rem;
+      min-height: 42px;
+    }
+
+    .modal-title { font-size: 1.4rem; margin-bottom: 10px; }
+    body.apple-theme .modal-title { font-size: 1.6rem; }
+
+    .modal-category { font-size: 0.65rem; letter-spacing: 2px; padding: 4px 10px; }
+    body.apple-theme .modal-category { font-size: 0.8rem; }
+
+    .modal-rating { margin-bottom: 14px; gap: 8px; }
+    .stars { font-size: 1rem; letter-spacing: 1px; }
+    .rating-text { font-size: 0.8rem; }
+
+    .modal-description {
+      font-size: 0.9rem; line-height: 1.6;
+      margin-bottom: 18px;
+    }
+    body.apple-theme .modal-description { font-size: 0.95rem; }
+
+    .modal-specs-title { font-size: 0.75rem; margin-bottom: 12px; }
+    body.apple-theme .modal-specs-title { font-size: 0.9rem; }
+    .modal-specs {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .spec-item {
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      border-radius: 10px;
+    }
+    .spec-icon { font-size: 1rem; }
+    .spec-label { font-size: 0.7rem; }
+
+    .modal-price-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+      padding-top: 16px;
+    }
+    .modal-price { font-size: 1.6rem; }
+    body.apple-theme .modal-price { font-size: 1.4rem; }
+    .modal-old-price { font-size: 0.9rem; }
+    .modal-add-btn {
+      width: 100%;
+      min-height: 50px;
+      padding: 14px 24px;
+      font-size: 0.95rem;
+    }
+    body.apple-theme .modal-add-btn { padding: 13px; font-size: 0.95rem; }
+
+    .compare-dock {
+      padding: 10px 12px;
+      gap: 8px;
+      border-radius: 16px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .compare-slot {
+      width: 70px; height: 90px;
+      flex-shrink: 0;
+    }
+    .compare-slot .slot-label { font-size: 0.5rem; }
+    .compare-empty-hint { font-size: 0.6rem; }
+    .compare-vs { font-size: 1rem; }
+    .compare-info { font-size: 0.7rem; max-width: 100px; }
+    .compare-close { width: 30px; height: 30px; font-size: 1rem; }
+
+    .transition-logo-wrap {
+      width: 160px; height: 160px;
+    }
+    .transition-apple svg {
+      width: 130px; height: 130px;
+    }
+    .transition-samsung .s-circle {
+      width: 130px; height: 130px;
+    }
+    .transition-samsung .s-letter { font-size: 5rem; transform: translateY(-5px); }
+    .transition-label {
+      font-size: 0.9rem;
+      letter-spacing: 4px;
+      bottom: -50px;
+    }
+    body.apple-theme .transition-label { font-size: 0.85rem; letter-spacing: 3px; }
+
+    .cart-panel { width: 100%; }
+    .cart-header {
+      padding: 18px 20px;
+      padding-top: calc(18px + env(safe-area-inset-top));
+    }
+    .cart-header h2 { font-size: 1.2rem; }
+    .cart-items { padding: 16px 20px; }
+    .cart-footer {
+      padding: 18px 20px;
+      padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    }
+    .cart-item {
+      padding: 12px; gap: 12px;
+      border-radius: 14px;
+    }
+    .cart-item-thumb { width: 50px; height: 66px; }
+    .cart-item-name { font-size: 0.85rem; }
+    .cart-item-price { font-size: 0.85rem; }
+    .cart-total-value { font-size: 1.35rem; }
+    body.apple-theme .cart-total-value { font-size: 1.2rem; }
+    .checkout-btn { padding: 14px; font-size: 0.95rem; min-height: 50px; }
+
+    .toast {
+      padding: 12px 20px;
+      font-size: 0.85rem;
+      border-radius: 12px;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+    body.apple-theme .toast { font-size: 0.8rem; padding: 12px 20px; }
+
+    footer {
+      padding: 24px 16px;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      font-size: 0.8rem;
+    }
+    body.apple-theme footer { font-size: 0.75rem; }
+
+    .smoke-container { display: none; }
+    .brand-glow { animation: none; opacity: 0.5; }
+    body::before { animation: none; }
+  }
+
+  @media (max-width: 380px) {
+    .brand-name { font-size: 1.8rem; letter-spacing: 3px; }
+    body.apple-theme .brand-name { font-size: 1.6rem; }
+    .phone-scene { width: 150px; height: 235px; }
+    .modal-phone-scene { width: 130px; height: 205px; }
+    .product-modal-content { padding: 20px 14px; }
+    .modal-title { font-size: 1.25rem; }
+    .modal-price { font-size: 1.4rem; }
+  }
+
+  @media (max-width: 900px) and (orientation: landscape) {
+    .product-modal-content {
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .modal-phone-scene { width: 130px; height: 205px; }
+    .brand-header { padding: 14px 20px; }
+    .brand-name { font-size: 2rem; letter-spacing: 4px; }
+  }
+
+  @media (hover: none) {
+    .product-card:hover { transform: none; }
+    .product-card:active { transform: scale(0.98); }
+    .phone-scene:active { cursor: default; }
+    .cart-btn:hover, .theme-toggle:hover, .sound-toggle:hover { transform: none; }
+  }
+
+  .cart-items, .product-modal {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-inner">
+    <div class="loader-logo">ТЕСТ</div>
+    <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+  </div>
+</div>
+
+<div class="smoke-container" id="smokeContainer"></div>
+
+<nav>
+  <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">ТЕСТ</div>
+  <ul class="nav-links">
+    <li><a href="#" onclick="goToPage(0);return false;"><span class="brand-dot"></span>Apple</a></li>
+    <li><a href="#" onclick="goToPage(1);return false;"><span class="brand-dot"></span>Samsung</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Звук" aria-label="Звук">🔊</button>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme(event)" title="Тема" aria-label="Тема">🌙</button>
+    <button class="cart-btn" onclick="toggleCart()" aria-label="Корзина">
+      🛒 <span class="cart-text">Корзина</span>
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<div class="book-container">
+  <div class="book" id="book">
+    <div class="page" id="page-0">
+      <div class="brand-header apple">
+        <div class="brand-glow"></div>
+        <div class="brand-logo-row">
+          <div class="brand-symbol">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+              <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+            </svg>
+          </div>
+          <h2 class="brand-name scramble-target" data-text="Apple">Apple</h2>
+        </div>
+        <p class="brand-tagline">Think Different</p>
+        <div class="brand-divider">
+          <div class="brand-divider-line"></div>
+          <div class="brand-divider-icon">✦</div>
+          <div class="brand-divider-line"></div>
+        </div>
+      </div>
+      <p class="section-subtitle">Наведите на телефон — он поднимется. Потяните — покрутится. Тапните — откроется карточка</p>
+      <div class="product-grid" id="grid-0"></div>
+    </div>
+
+    <div class="page hidden" id="page-1">
+      <div class="brand-header samsung">
+        <div class="brand-glow"></div>
+        <div class="brand-logo-row">
+          <div class="brand-symbol">
+            <svg viewBox="0 0 60 20" width="60" height="20" fill="currentColor">
+              <ellipse cx="30" cy="10" rx="28" ry="9" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
+              <text x="30" y="14" text-anchor="middle" font-size="9" font-weight="800" letter-spacing="1.5" font-family="Arial">SAMSUNG</text>
+            </svg>
+          </div>
+          <h2 class="brand-name scramble-target" data-text="Samsung">Samsung</h2>
+        </div>
+        <p class="brand-tagline">Do What You Can't</p>
+        <div class="brand-divider">
+          <div class="brand-divider-line"></div>
+          <div class="brand-divider-icon">✦</div>
+          <div class="brand-divider-line"></div>
+        </div>
+      </div>
+      <p class="section-subtitle">Наведите на телефон — он поднимется. Потяните — покрутится. Тапните — откроется карточка</p>
+      <div class="product-grid" id="grid-1"></div>
+    </div>
+  </div>
+
+  <div class="page-controls">
+    <button class="page-btn" id="prevBtn" onclick="goToPage(currentPage - 1)" disabled>← Назад</button>
+    <div class="page-indicator" id="pageIndicator"></div>
+    <button class="page-btn" id="nextBtn" onclick="goToPage(currentPage + 1)">Далее →</button>
+  </div>
+</div>
+
+<footer id="footer">
+  © 2025 ТЕСТ — Магазин техники
+</footer>
+
+<div class="transition-overlay" id="transitionOverlay">
+  <div class="transition-logo-wrap">
+    <div class="transition-pulse"></div>
+    <div class="transition-pulse delay-1"></div>
+    <div class="transition-pulse delay-2"></div>
+    <div class="transition-apple">
+      <svg viewBox="0 0 24 24" width="180" height="180" fill="currentColor">
+        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+      </svg>
+    </div>
+    <div class="transition-samsung">
+      <div class="s-circle">
+        <div class="s-letter">S</div>
+      </div>
+    </div>
+    <div class="transition-label" id="transitionLabel"></div>
+  </div>
+</div>
+
+<div class="compare-dock" id="compareDock">
+  <div class="compare-slot" id="slotA">
+    <div class="compare-empty-hint">Выберите<br>модель</div>
+  </div>
+  <div class="compare-vs">VS</div>
+  <div class="compare-slot" id="slotB">
+    <div class="compare-empty-hint">Выберите<br>модель</div>
+  </div>
+  <div class="compare-info" id="compareInfo"></div>
+  <button class="compare-close" onclick="clearCompare()" aria-label="Закрыть">×</button>
+</div>
+
+<div class="product-modal-overlay" id="productModalOverlay">
+  <div class="product-modal" id="productModal">
+    <button class="modal-close" onclick="closeProductModal()" aria-label="Закрыть">×</button>
+    <div class="product-modal-content" id="modalContent"></div>
+  </div>
+</div>
+
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<aside class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <h2>🛒 Корзина</h2>
+    <button class="close-cart" onclick="toggleCart()" aria-label="Закрыть">×</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none;">
+    <div class="cart-total">
+      <span class="cart-total-label">Итого:</span>
+      <span class="cart-total-value" id="cartTotal">0 ₽</span>
+    </div>
+    <button class="checkout-btn" onclick="checkout()">Оформить заказ</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"><span id="toastText">Товар добавлен</span></div>
+<div class="theme-wave" id="themeWave"></div>
+
+<script>
+  // ============ АВАРИЙНОЕ СКРЫТИЕ ПРЕЛОАДЕРА (сработает в любом случае) ============
+  (function() {
+    function hideLoader() {
+      const loader = document.getElementById('loader');
+      if (!loader || loader.classList.contains('done')) return;
+      loader.classList.add('done');
+      setTimeout(() => {
+        if (loader.parentNode) loader.parentNode.removeChild(loader);
+      }, 800);
+    }
+
+    // 1) Если документ уже загружен — скрываем через 600 мс
+    if (document.readyState === 'complete') {
+      setTimeout(hideLoader, 600);
+    } else {
+      window.addEventListener('load', () => setTimeout(hideLoader, 600));
+    }
+
+    // 2) Fallback: гарантированно убираем через 2 секунды после DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(hideLoader, 2000);
+    });
+
+    // 3) Аварийный: если ничего не сработало — убираем через 3.5 сек
+    setTimeout(hideLoader, 3500);
+
+    // 4) Ещё аварийнее: любой тап/клик по экрану тоже убирает прелоадер
+    document.addEventListener('touchstart', hideLoader, { once: true, passive: true });
+    document.addEventListener('click', hideLoader, { once: true });
+
+    // 5) Ловим ошибки JS, чтобы прелоадер не зависал
+    window.addEventListener('error', hideLoader);
+  })();
+
+  // Определяем тач-устройство
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+  // ============ ЗВУК ============
+  let soundEnabled = !isTouchDevice;
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { soundEnabled = false; }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playTone(freq, duration = 0.1, type = 'sine', volume = 0.15) {
+    if (!soundEnabled) return;
+    initAudio();
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  function soundClick() { playTone(880, 0.08, 'sine', 0.12); setTimeout(() => playTone(1320, 0.06, 'sine', 0.08), 40); }
+  function soundPage() {
+    playTone(330, 0.2, 'sine', 0.1);
+    setTimeout(() => playTone(495, 0.25, 'triangle', 0.1), 150);
+    setTimeout(() => playTone(660, 0.3, 'triangle', 0.09), 320);
+    setTimeout(() => playTone(990, 0.4, 'sine', 0.08), 520);
+  }
+  function soundAdd() { playTone(660, 0.1, 'sine', 0.14); setTimeout(() => playTone(990, 0.15, 'sine', 0.12), 80); }
+  function soundHover() { playTone(1200, 0.04, 'sine', 0.05); }
+  function soundSplash() { playTone(523, 0.2, 'sine', 0.1); setTimeout(() => playTone(659, 0.2, 'sine', 0.1), 150); setTimeout(() => playTone(784, 0.4, 'sine', 0.12), 300); }
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+    document.getElementById('soundToggle').classList.toggle('muted', !soundEnabled);
+    if (soundEnabled) { initAudio(); soundClick(); }
+  }
+
+  if (!soundEnabled) {
+    document.getElementById('soundToggle').textContent = '🔇';
+    document.getElementById('soundToggle').classList.add('muted');
+  }
+
+  document.addEventListener('click', () => { initAudio(); }, { once: true });
+  document.addEventListener('touchstart', () => { initAudio(); }, { once: true, passive: true });
+
+  // ============ ТЕМА ============
+  const THEMES = ['dark', 'light', 'apple'];
+  const THEME_ICONS = { dark: '🌙', light: '☀️', apple: '⚪' };
+  const THEME_TITLES = { dark: 'Тёмная тема', light: 'Светлая тема', apple: 'Минимализм Apple' };
+  let currentTheme = 'dark';
+
+  function applyTheme(theme) {
+    document.body.classList.remove('light-theme', 'apple-theme');
+    if (theme === 'light') document.body.classList.add('light-theme');
+    else if (theme === 'apple') document.body.classList.add('apple-theme');
+    const btn = document.getElementById('themeToggle');
+    btn.textContent = THEME_ICONS[theme];
+    btn.title = THEME_TITLES[theme];
+    currentTheme = theme;
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', theme === 'dark' ? '#06152b' : theme === 'light' ? '#f0f9ff' : '#ffffff');
+    }
+  }
+
+  function toggleTheme(e) {
+    const wave = document.getElementById('themeWave');
+    const x = (e && e.clientX) || (e && e.touches && e.touches[0]?.clientX) || window.innerWidth / 2;
+    const y = (e && e.clientY) || (e && e.touches && e.touches[0]?.clientY) || window.innerHeight / 2;
+    wave.style.left = x + 'px'; wave.style.top = y + 'px';
+    wave.classList.remove('active');
+    void wave.offsetWidth;
+    wave.classList.add('active');
+    setTimeout(() => {
+      const idx = THEMES.indexOf(currentTheme);
+      const next = THEMES[(idx + 1) % THEMES.length];
+      applyTheme(next);
+      soundPage();
+    }, 300);
+  }
+
+  // ============ TEXT SCRAMBLE ============
+  const scrambleChars = '!<>-_\\/[]{}—=+*^?#abcdefghijklmnopqrstuvwxyz0123456789';
+  function scramble(el) {
+    if (document.body.classList.contains('apple-theme')) return;
+    if (isTouchDevice) return;
+    const original = el.dataset.text || el.textContent;
+    let iteration = 0;
+    const maxIter = 20;
+    clearInterval(el._scrambleInterval);
+    el._scrambleInterval = setInterval(() => {
+      el.textContent = original.split('').map((ch, i) => {
+        if (i < iteration / maxIter * original.length) return ch;
+        if (ch === ' ') return ' ';
+        return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+      }).join('');
+      iteration++;
+      if (iteration > maxIter) {
+        clearInterval(el._scrambleInterval);
+        el.textContent = original;
+      }
+    }, 40);
+  }
+
+  // ============ ДЫМ ============
+  function createSmoke() {
+    if (isMobile) return;
+    const container = document.getElementById('smokeContainer');
+    if (!container) return;
+    for (let i = 0; i < 6; i++) {
+      const s = document.createElement('div');
+      s.className = 'smoke';
+      s.style.left = Math.random() * 100 + '%';
+      s.style.top = (30 + Math.random() * 60) + '%';
+      s.style.animationDuration = (20 + Math.random() * 20) + 's';
+      s.style.animationDelay = Math.random() * 20 + 's';
+      container.appendChild(s);
+    }
+  }
+
+  // ============ SVG РЕНДЕРЫ ============
+  function appleLogo(c) {
+    return `<path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="${c}"/>`;
+  }
+
+  function renderBackSVG(cfg) {
+    const { id, c1, c2, accent, brand, cameraShape } = cfg;
+    const uniq = 'b' + id;
+    const isApple = brand === 'apple';
+    const logo = isApple
+      ? `<g transform="translate(100, 155) scale(2.4)" style="opacity:0.85">${appleLogo(accent || '#e2e8f0')}</g>`
+      : `<text x="100" y="160" text-anchor="middle" font-size="12" font-weight="800" letter-spacing="3" font-family="Arial" fill="${accent || '#cbd5e1'}" opacity="0.9">SAMSUNG</text>`;
+    const backLabel = isApple
+      ? `<text x="100" y="290" text-anchor="middle" font-size="6" letter-spacing="3" font-family="Arial" fill="rgba(200,210,230,0.55)">iPhone</text>`
+      : `<text x="100" y="290" text-anchor="middle" font-size="6" letter-spacing="3" font-family="Arial" fill="rgba(200,210,230,0.55)">Galaxy</text>`;
+
+    let camera = '';
+    if (isApple) {
+      if (cameraShape === 'pro-triangle') {
+        camera = `
+          <rect x="14" y="14" width="76" height="76" rx="20" fill="url(#cam${uniq})" stroke="rgba(150,170,200,0.2)" stroke-width="0.5"/>
+          <circle cx="38" cy="38" r="14" fill="#0a0e1a" stroke="#1a202c" stroke-width="1"/>
+          <circle cx="38" cy="38" r="10" fill="url(#lens${uniq})"/>
+          <circle cx="38" cy="38" r="4" fill="#000"/>
+          <circle cx="35" cy="35" r="2" fill="rgba(147,197,253,0.9)" filter="blur(0.5)"/>
+          <circle cx="66" cy="38" r="14" fill="#0a0e1a" stroke="#1a202c" stroke-width="1"/>
+          <circle cx="66" cy="38" r="10" fill="url(#lens${uniq})"/>
+          <circle cx="66" cy="38" r="4" fill="#000"/>
+          <circle cx="63" cy="35" r="2" fill="rgba(147,197,253,0.9)" filter="blur(0.5)"/>
+          <circle cx="52" cy="66" r="14" fill="#0a0e1a" stroke="#1a202c" stroke-width="1"/>
+          <circle cx="52" cy="66" r="10" fill="url(#lens${uniq})"/>
+          <circle cx="52" cy="66" r="4" fill="#000"/>
+          <circle cx="49" cy="63" r="2" fill="rgba(147,197,253,0.9)" filter="blur(0.5)"/>
+          <circle cx="78" cy="20" r="5" fill="url(#flash${uniq})"/>
+        `;
+      } else if (cameraShape === 'dual-diagonal') {
+        camera = `
+          <rect x="14" y="14" width="66" height="66" rx="18" fill="url(#cam${uniq})" stroke="rgba(150,170,200,0.2)" stroke-width="0.5"/>
+          <circle cx="36" cy="36" r="13" fill="#0a0e1a" stroke="#1a202c" stroke-width="1"/>
+          <circle cx="36" cy="36" r="9" fill="url(#lens${uniq})"/>
+          <circle cx="36" cy="36" r="3.5" fill="#000"/>
+          <circle cx="33.5" cy="33.5" r="1.8" fill="rgba(147,197,253,0.9)" filter="blur(0.5)"/>
+          <circle cx="58" cy="58" r="13" fill="#0a0e1a" stroke="#1a202c" stroke-width="1"/>
+          <circle cx="58" cy="58" r="9" fill="url(#lens${uniq})"/>
+          <circle cx="58" cy="58" r="3.5" fill="#000"/>
+          <circle cx="55.5" cy="55.5" r="1.8" fill="rgba(147,197,253,0.9)" filter="blur(0.5)"/>
+          <circle cx="68" cy="22" r="4.5" fill="url(#flash${uniq})"/>
+        `;
+      } else {
+        camera = `
+          <rect x="14" y="14" width="42" height="42" rx="14" fill="url(#cam${uniq})" stroke="rgba(150,170,200,0.2)" stroke-width="0.5"/>
+          <circle cx="35" cy="35" r="13" fill="#0a0e1a" stroke="#1a202c" stroke-width="1"/>
+          <circle cx="35" cy="35" r="9" fill="url(#lens${uniq})"/>
+          <circle cx="35" cy="35" r="3.5" fill="#000"/>
+          <circle cx="32.5" cy="32.5" r="1.8" fill="rgba(147,197,253,0.9)" filter="blur(0.5)"/>
+          <circle cx="46" cy="18" r="4" fill="url(#flash${uniq})"/>
+        `;
+      }
+    } else {
+      const lensY = [30, 55, 80];
+      camera = `
+        <rect x="18" y="14" width="34" height="90" rx="14" fill="url(#cam${uniq})" stroke="rgba(150,170,200,0.2)" stroke-width="0.5"/>
+        ${lensY.map((y) => `
+          <circle cx="35" cy="${y}" r="10" fill="#0a0e1a" stroke="#1a202c" stroke-width="0.8"/>
+          <circle cx="35" cy="${y}" r="7" fill="url(#lens${uniq})"/>
+          <circle cx="35" cy="${y}" r="2.8" fill="#000"/>
+          <circle cx="33" cy="${y-2}" r="1.4" fill="rgba(147,197,253,0.9)" filter="blur(0.5)"/>
+        `).join('')}
+        <circle cx="44" cy="18" r="3.5" fill="url(#flash${uniq})"/>
+      `;
+    }
+
+    return `
+      <svg viewBox="0 0 200 310" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="body${uniq}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="${c1}"/>
+            <stop offset="45%" stop-color="${c2}"/>
+            <stop offset="100%" stop-color="${c1}"/>
+          </linearGradient>
+          <linearGradient id="cam${uniq}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2d3748"/>
+            <stop offset="100%" stop-color="#0f1419"/>
+          </linearGradient>
+          <radialGradient id="lens${uniq}" cx="0.35" cy="0.35">
+            <stop offset="0%" stop-color="#3b82f6"/>
+            <stop offset="30%" stop-color="#1e3a8a"/>
+            <stop offset="100%" stop-color="#000"/>
+          </radialGradient>
+          <radialGradient id="flash${uniq}" cx="0.5" cy="0.5">
+            <stop offset="0%" stop-color="#fef9c3"/>
+            <stop offset="100%" stop-color="#facc15"/>
+          </radialGradient>
+          <linearGradient id="highlight${uniq}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.25)"/>
+            <stop offset="40%" stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="196" height="306" rx="34" fill="url(#body${uniq})" stroke="rgba(200,220,255,0.3)" stroke-width="1.5"/>
+        <rect x="2" y="2" width="196" height="306" rx="34" fill="url(#highlight${uniq})"/>
+        ${camera}
+        ${logo}
+        ${backLabel}
+      </svg>
+    `;
+  }
+
+  function renderFrontSVG(cfg) {
+    const { id, model, brand, wallpaper } = cfg;
+    const uniq = 'f' + id;
+    const isApple = brand === 'apple';
+    const wp = wallpaper || 'blue';
+
+    return `
+      <svg viewBox="0 0 200 310" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="wall${uniq}" x1="0" y1="0" x2="1" y2="1">
+            ${wp === 'blue' ? `
+              <stop offset="0%" stop-color="#1e3a8a"/>
+              <stop offset="45%" stop-color="#0891b2"/>
+              <stop offset="100%" stop-color="#0a2540"/>
+            ` : wp === 'sunset' ? `
+              <stop offset="0%" stop-color="#f97316"/>
+              <stop offset="45%" stop-color="#ec4899"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            ` : wp === 'mint' ? `
+              <stop offset="0%" stop-color="#10b981"/>
+              <stop offset="45%" stop-color="#22d3ee"/>
+              <stop offset="100%" stop-color="#1e3a8a"/>
+            ` : wp === 'violet' ? `
+              <stop offset="0%" stop-color="#8b5cf6"/>
+              <stop offset="45%" stop-color="#ec4899"/>
+              <stop offset="100%" stop-color="#1e1b4b"/>
+            ` : wp === 'dark' ? `
+              <stop offset="0%" stop-color="#0a0e1a"/>
+              <stop offset="45%" stop-color="#1a2035"/>
+              <stop offset="100%" stop-color="#000"/>
+            ` : `
+              <stop offset="0%" stop-color="#f0f9ff"/>
+              <stop offset="45%" stop-color="#a5f3fc"/>
+              <stop offset="100%" stop-color="#0369a1"/>
+            `}
+          </linearGradient>
+          <radialGradient id="glow${uniq}" cx="0.3" cy="0.2" r="0.7">
+            <stop offset="0%" stop-color="rgba(103,232,249,0.5)"/>
+            <stop offset="60%" stop-color="rgba(103,232,249,0)"/>
+          </radialGradient>
+        </defs>
+        <rect x="2" y="2" width="196" height="306" rx="34" fill="#0a0e1a" stroke="rgba(180,200,220,0.35)" stroke-width="1.5"/>
+        <rect x="7" y="7" width="186" height="296" rx="29" fill="url(#wall${uniq})"/>
+        <rect x="7" y="7" width="186" height="296" rx="29" fill="url(#glow${uniq})"/>
+        ${isApple ? `
+          <rect x="78" y="14" width="44" height="14" rx="7" fill="#000"/>
+          <circle cx="112" cy="21" r="3" fill="#1a202c"/>
+        ` : `
+          <circle cx="100" cy="20" r="4" fill="#000"/>
+        `}
+        <text x="100" y="140" text-anchor="middle" font-size="20" font-weight="900" letter-spacing="2" font-family="Arial" fill="#fff" style="text-shadow: 0 2px 8px rgba(34,211,238,0.8)">ТЕСТ</text>
+        <text x="100" y="160" text-anchor="middle" font-size="7" letter-spacing="3" font-family="Arial" fill="rgba(224,242,254,0.9)">${model}</text>
+        <text x="100" y="270" text-anchor="middle" font-size="5" letter-spacing="2" font-family="Arial" fill="rgba(224,242,254,0.5)">Swipe up</text>
+        <rect x="80" y="285" width="40" height="2" rx="1" fill="rgba(255,255,255,0.6)"/>
+      </svg>
+    `;
+  }
+
+  function renderPhone(p) {
+    const cfg = {
+      id: p.id, c1: p.c1, c2: p.c2,
+      accent: p.brand === 'apple' ? '#e2e8f0' : '#cbd5e1',
+      brand: p.brand,
+      cameraShape: p.cameraShape || (p.brand === 'apple' ? 'dual-diagonal' : 'samsung-vertical'),
+      model: p.model, wallpaper: p.wallpaper || 'blue',
+    };
+    return { back: renderBackSVG(cfg), front: renderFrontSVG(cfg) };
+  }
+
+  function miniPhoneSVG(c1, c2, brand) {
+    const logo = brand === 'apple'
+      ? `<path d="M30 45 c-0.5 0.5 -1 0.4 -1.5 0.2 -0.5 -0.2 -1 -0.2 -1.5 0 -0.7 0.3 -1 0.2 -1.5 -0.2 -1.4 -2.5 -1 -6.2 1.6 -6.3 0.6 0 1 0.3 1.4 0.3 0.5 -0.1 1 -0.4 1.6 -0.4 0.7 0.1 1.2 0.3 1.6 0.8 -1.4 0.9 -1.1 2.8 0.2 3.3 -0.3 0.7 -0.6 1.4 -1.2 2z" fill="#cbd5e1" opacity="0.9"/>`
+      : `<text x="30" y="50" text-anchor="middle" fill="#cbd5e1" font-size="5" font-weight="800" font-family="Arial" opacity="0.9">SAMSUNG</text>`;
+    return `<svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g${c1.replace('#','')}${c2.replace('#','')}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="${c1}"/>
+          <stop offset="100%" stop-color="${c2}"/>
+        </linearGradient>
+      </defs>
+      <rect x="4" y="2" width="52" height="76" rx="10" fill="url(#g${c1.replace('#','')}${c2.replace('#','')})" stroke="rgba(200,220,255,0.4)" stroke-width="1"/>
+      <rect x="10" y="10" width="22" height="22" rx="6" fill="#1a202c" stroke="rgba(150,170,200,0.4)" stroke-width="0.5"/>
+      <circle cx="16" cy="16" r="4" fill="#0a0e1a" stroke="#3b82f6" stroke-width="0.5"/>
+      <circle cx="26" cy="16" r="4" fill="#0a0e1a" stroke="#3b82f6" stroke-width="0.5"/>
+      <circle cx="16" cy="26" r="4" fill="#0a0e1a" stroke="#3b82f6" stroke-width="0.5"/>
+      <circle cx="26" cy="26" r="3" fill="#fef9c3"/>
+      ${logo}
+    </svg>`;
+  }
+
+  // ============ ДАННЫЕ ============
+  const iphones = [
+    { id: 1, name: 'iPhone 15 Pro Max', model: '15 PRO MAX', specs: '6.7" · A17 Pro · 256 ГБ', price: 129990, oldPrice: 139990, c1: '#b8b2a8', c2: '#4a4340', brand: 'apple', cameraShape: 'pro-triangle', wallpaper: 'dark', rating: 5, ratingCount: 2847, description: 'Флагман Apple с титановым корпусом и самым мощным чипом A17 Pro.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.7" Super Retina XDR' },
+      { icon: '⚡', label: 'Процессор', value: 'A17 Pro' },
+      { icon: '💾', label: 'Память', value: '256 ГБ' },
+      { icon: '📷', label: 'Камера', value: '48 МП + 12 + 12' },
+      { icon: '🔋', label: 'Автономность', value: 'до 29 часов' },
+      { icon: '🎨', label: 'Цвет', value: 'Титановый чёрный' },
+    ]},
+    { id: 2, name: 'iPhone 15 Pro', model: '15 PRO', specs: '6.1" · A17 Pro · 128 ГБ', price: 109990, oldPrice: 119990, c1: '#c7b299', c2: '#7a6a55', brand: 'apple', cameraShape: 'pro-triangle', wallpaper: 'sunset', rating: 5, ratingCount: 1923, description: 'Компактный флагман с титановым корпусом.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.1" Super Retina XDR' },
+      { icon: '⚡', label: 'Процессор', value: 'A17 Pro' },
+      { icon: '💾', label: 'Память', value: '128 ГБ' },
+      { icon: '📷', label: 'Камера', value: '48 МП + 12 + 12' },
+      { icon: '🔋', label: 'Автономность', value: 'до 23 часов' },
+      { icon: '🎨', label: 'Цвет', value: 'Титановый натуральный' },
+    ]},
+    { id: 3, name: 'iPhone 15', model: '15', specs: '6.1" · A16 · 128 ГБ', price: 89990, oldPrice: 94990, c1: '#f8d6df', c2: '#d89aa8', brand: 'apple', cameraShape: 'dual-diagonal', wallpaper: 'violet', rating: 5, ratingCount: 3412, description: 'iPhone 15 с Dynamic Island и камерой 48 МП.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.1" Super Retina XDR' },
+      { icon: '⚡', label: 'Процессор', value: 'A16 Bionic' },
+      { icon: '💾', label: 'Память', value: '128 ГБ' },
+      { icon: '📷', label: 'Камера', value: '48 МП + 12 МП' },
+      { icon: '🔋', label: 'Автономность', value: 'до 20 часов' },
+      { icon: '🎨', label: 'Цвет', value: 'Розовый' },
+    ]},
+    { id: 4, name: 'iPhone 14 Pro', model: '14 PRO', specs: '6.1" · A16 · 128 ГБ', price: 94990, oldPrice: 109990, c1: '#3a3a3c', c2: '#0f0f10', brand: 'apple', cameraShape: 'pro-triangle', wallpaper: 'blue', rating: 5, ratingCount: 2561, description: 'Первый iPhone с Dynamic Island.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.1" ProMotion 120 Гц' },
+      { icon: '⚡', label: 'Процессор', value: 'A16 Bionic' },
+      { icon: '💾', label: 'Память', value: '128 ГБ' },
+      { icon: '📷', label: 'Камера', value: '48 МП + 12 + 12' },
+      { icon: '🔋', label: 'Автономность', value: 'до 23 часов' },
+      { icon: '🎨', label: 'Цвет', value: 'Космический чёрный' },
+    ]},
+    { id: 5, name: 'iPhone 14', model: '14', specs: '6.1" · A15 · 128 ГБ', price: 74990, oldPrice: 84990, c1: '#a3d4f7', c2: '#3b82c6', brand: 'apple', cameraShape: 'dual-diagonal', wallpaper: 'blue', rating: 5, ratingCount: 4102, description: 'Надёжный iPhone 14.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.1" Super Retina XDR' },
+      { icon: '⚡', label: 'Процессор', value: 'A15 Bionic' },
+      { icon: '💾', label: 'Память', value: '128 ГБ' },
+      { icon: '📷', label: 'Камера', value: '12 МП + 12 МП' },
+      { icon: '🔋', label: 'Автономность', value: 'до 20 часов' },
+      { icon: '🎨', label: 'Цвет', value: 'Голубой' },
+    ]},
+    { id: 6, name: 'iPhone 13', model: '13', specs: '6.1" · A15 · 128 ГБ', price: 64990, oldPrice: 74990, c1: '#3d6b48', c2: '#14532d', brand: 'apple', cameraShape: 'dual-diagonal', wallpaper: 'mint', rating: 5, ratingCount: 5820, description: 'Один из самых популярных iPhone.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.1" Super Retina XDR' },
+      { icon: '⚡', label: 'Процессор', value: 'A15 Bionic' },
+      { icon: '💾', label: 'Память', value: '128 ГБ' },
+      { icon: '📷', label: 'Камера', value: '12 МП + 12 МП' },
+      { icon: '🔋', label: 'Автономность', value: 'до 19 часов' },
+      { icon: '🎨', label: 'Цвет', value: 'Тёмно-зелёный' },
+    ]},
+    { id: 7, name: 'iPhone SE', model: 'SE 2022', specs: '4.7" · A15 · 64 ГБ', price: 44990, oldPrice: 49990, c1: '#f0f0f2', c2: '#a8a8ad', brand: 'apple', cameraShape: 'single', wallpaper: 'light', rating: 4, ratingCount: 1245, description: 'Компактный iPhone с кнопкой Home.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '4.7" Retina HD' },
+      { icon: '⚡', label: 'Процессор', value: 'A15 Bionic' },
+      { icon: '💾', label: 'Память', value: '64 ГБ' },
+      { icon: '📷', label: 'Камера', value: '12 МП' },
+      { icon: '🔋', label: 'Автономность', value: 'до 15 часов' },
+      { icon: '🎨', label: 'Цвет', value: 'Белый' },
+    ]},
+    { id: 8, name: 'iPhone 12', model: '12', specs: '6.1" · A14 · 64 ГБ', price: 54990, oldPrice: 64990, c1: '#2a4a99', c2: '#0f2452', brand: 'apple', cameraShape: 'dual-diagonal', wallpaper: 'blue', rating: 5, ratingCount: 6221, description: 'iPhone 12 с поддержкой 5G.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.1" Super Retina XDR' },
+      { icon: '⚡', label: 'Процессор', value: 'A14 Bionic' },
+      { icon: '💾', label: 'Память', value: '64 ГБ' },
+      { icon: '📷', label: 'Камера', value: '12 МП + 12 МП' },
+      { icon: '🔋', label: 'Автономность', value: 'до 17 часов' },
+      { icon: '🎨', label: 'Цвет', value: 'Синий' },
+    ]},
+  ];
+
+  const samsungs = [
+    { id: 101, name: 'Galaxy S24 Ultra', model: 'S24 ULTRA', specs: '6.8" · Snapdragon 8 Gen 3', price: 139990, oldPrice: 154990, c1: '#5a5a5a', c2: '#1a1a1a', brand: 'samsung', wallpaper: 'dark', rating: 5, ratingCount: 1823, description: 'Флагман Samsung с титановой рамкой и S Pen.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.8" Dynamic AMOLED 2X' },
+      { icon: '⚡', label: 'Процессор', value: 'Snapdragon 8 Gen 3' },
+      { icon: '💾', label: 'Память', value: '256 ГБ' },
+      { icon: '📷', label: 'Камера', value: '200 МП + 12 + 50 + 10' },
+      { icon: '🔋', label: 'Батарея', value: '5000 мАч' },
+      { icon: '✏️', label: 'S Pen', value: 'В комплекте' },
+    ]},
+    { id: 102, name: 'Galaxy S24+', model: 'S24 PLUS', specs: '6.7" · Exynos 2400', price: 109990, oldPrice: 119990, c1: '#6e6e70', c2: '#2a2a2c', brand: 'samsung', wallpaper: 'sunset', rating: 5, ratingCount: 1122, description: 'Galaxy S24+ с 6.7" экраном.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.7" Dynamic AMOLED 2X' },
+      { icon: '⚡', label: 'Процессор', value: 'Exynos 2400' },
+      { icon: '💾', label: 'Память', value: '256 ГБ' },
+      { icon: '📷', label: 'Камера', value: '50 МП + 12 + 10' },
+      { icon: '🔋', label: 'Батарея', value: '4900 мАч' },
+      { icon: '🎨', label: 'Цвет', value: 'Ониксовый' },
+    ]},
+    { id: 103, name: 'Galaxy S24', model: 'S24', specs: '6.2" · Exynos 2400', price: 89990, oldPrice: 99990, c1: '#f0e2b8', c2: '#b89868', brand: 'samsung', wallpaper: 'sunset', rating: 5, ratingCount: 987, description: 'Компактный флагман Galaxy S24.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.2" Dynamic AMOLED 2X' },
+      { icon: '⚡', label: 'Процессор', value: 'Exynos 2400' },
+      { icon: '💾', label: 'Память', value: '128 ГБ' },
+      { icon: '📷', label: 'Камера', value: '50 МП + 12 + 10' },
+      { icon: '🔋', label: 'Батарея', value: '4000 мАч' },
+      { icon: '🎨', label: 'Цвет', value: 'Жёлтый' },
+    ]},
+    { id: 104, name: 'Galaxy Z Fold 5', model: 'Z FOLD 5', specs: '7.6" · Snapdragon 8 Gen 2', price: 169990, oldPrice: 189990, c1: '#7a8aa8', c2: '#2d3b52', brand: 'samsung', wallpaper: 'violet', rating: 5, ratingCount: 654, description: 'Складной флагман с 7.6" экраном.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '7.6" Foldable AMOLED' },
+      { icon: '⚡', label: 'Процессор', value: 'Snapdragon 8 Gen 2' },
+      { icon: '💾', label: 'Память', value: '256 ГБ' },
+      { icon: '📷', label: 'Камера', value: '50 МП + 12 + 10' },
+      { icon: '🔋', label: 'Батарея', value: '4400 мАч' },
+      { icon: '🎨', label: 'Цвет', value: 'Синий лёд' },
+    ]},
+    { id: 105, name: 'Galaxy Z Flip 5', model: 'Z FLIP 5', specs: '6.7" · Snapdragon 8 Gen 2', price: 119990, oldPrice: 134990, c1: '#d4c0e0', c2: '#8a7898', brand: 'samsung', wallpaper: 'violet', rating: 5, ratingCount: 892, description: 'Компактный складной смартфон.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.7" Foldable AMOLED' },
+      { icon: '⚡', label: 'Процессор', value: 'Snapdragon 8 Gen 2' },
+      { icon: '💾', label: 'Память', value: '256 ГБ' },
+      { icon: '📷', label: 'Камера', value: '12 МП + 12 МП' },
+      { icon: '🔋', label: 'Батарея', value: '3700 мАч' },
+      { icon: '🎨', label: 'Цвет', value: 'Лавандовый' },
+    ]},
+    { id: 106, name: 'Galaxy S23 Ultra', model: 'S23 ULTRA', specs: '6.8" · Snapdragon 8 Gen 2', price: 109990, oldPrice: 129990, c1: '#3d4756', c2: '#0f1419', brand: 'samsung', wallpaper: 'dark', rating: 5, ratingCount: 2456, description: 'Предыдущий флагман с камерой 200 МП.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.8" Dynamic AMOLED 2X' },
+      { icon: '⚡', label: 'Процессор', value: 'Snapdragon 8 Gen 2' },
+      { icon: '💾', label: 'Память', value: '256 ГБ' },
+      { icon: '📷', label: 'Камера', value: '200 МП + 12 + 10 + 10' },
+      { icon: '🔋', label: 'Батарея', value: '5000 мАч' },
+      { icon: '✏️', label: 'S Pen', value: 'В комплекте' },
+    ]},
+    { id: 107, name: 'Galaxy A54', model: 'A54', specs: '6.4" · Exynos 1380', price: 34990, oldPrice: 39990, c1: '#3aad8a', c2: '#0e4a36', brand: 'samsung', wallpaper: 'mint', rating: 4, ratingCount: 1892, description: 'Популярный среднебюджетник.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.4" Super AMOLED 120 Гц' },
+      { icon: '⚡', label: 'Процессор', value: 'Exynos 1380' },
+      { icon: '💾', label: 'Память', value: '128 ГБ' },
+      { icon: '📷', label: 'Камера', value: '50 МП + 12 + 5' },
+      { icon: '🔋', label: 'Батарея', value: '5000 мАч' },
+      { icon: '🎨', label: 'Цвет', value: 'Изумрудный' },
+    ]},
+    { id: 108, name: 'Galaxy A34', model: 'A34', specs: '6.6" · Dimensity 1080', price: 27990, oldPrice: 31990, c1: '#d6dce4', c2: '#7a8290', brand: 'samsung', wallpaper: 'light', rating: 4, ratingCount: 1523, description: 'Доступный смартфон с большим экраном.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.6" Super AMOLED 120 Гц' },
+      { icon: '⚡', label: 'Процессор', value: 'Dimensity 1080' },
+      { icon: '💾', label: 'Память', value: '128 ГБ' },
+      { icon: '📷', label: 'Камера', value: '48 МП + 8 + 5' },
+      { icon: '🔋', label: 'Батарея', value: '5000 мАч' },
+      { icon: '🎨', label: 'Цвет', value: 'Серебристый' },
+    ]},
+    { id: 109, name: 'Galaxy A14', model: 'A14', specs: '6.6" · Helio G80', price: 15990, oldPrice: 18990, c1: '#2a2a2a', c2: '#0a0a0a', brand: 'samsung', wallpaper: 'dark', rating: 4, ratingCount: 2104, description: 'Бюджетный Samsung.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.6" PLS LCD 90 Гц' },
+      { icon: '⚡', label: 'Процессор', value: 'Helio G80' },
+      { icon: '💾', label: 'Память', value: '64 ГБ' },
+      { icon: '📷', label: 'Камера', value: '50 МП + 5 + 2' },
+      { icon: '🔋', label: 'Батарея', value: '5000 мАч' },
+      { icon: '🎨', label: 'Цвет', value: 'Чёрный' },
+    ]},
+    { id: 110, name: 'Galaxy M54', model: 'M54', specs: '6.7" · Exynos 1380', price: 32990, oldPrice: 37990, c1: '#8b5e3a', c2: '#3d2412', brand: 'samsung', wallpaper: 'sunset', rating: 4, ratingCount: 876, description: 'Смартфон с батареей 6000 мАч.', detailSpecs: [
+      { icon: '📱', label: 'Дисплей', value: '6.7" Super AMOLED 120 Гц' },
+      { icon: '⚡', label: 'Процессор', value: 'Exynos 1380' },
+      { icon: '💾', label: 'Память', value: '256 ГБ' },
+      { icon: '📷', label: 'Камера', value: '108 МП + 8 + 2' },
+      { icon: '🔋', label: 'Батарея', value: '6000 мАч' },
+      { icon: '🎨', label: 'Цвет', value: 'Тёмно-синий' },
+    ]},
+  ];
+
+  const pages = [
+    { name: 'Apple', grid: 'grid-0', page: 'page-0', products: iphones },
+    { name: 'Samsung', grid: 'grid-1', page: 'page-1', products: samsungs },
+  ];
+
+  const allProducts = [...iphones, ...samsungs];
+  const cart = {};
+  const rotations = {};
+  const modalRotations = {};
+  let currentPage = 0;
+  let isFlipping = false;
+
+  // ============ COMPARE ============
+  const compare = { a: null, b: null };
+
+  function toggleCompare(id, e) {
+    e.stopPropagation();
+    if (compare.a === id) compare.a = null;
+    else if (compare.b === id) compare.b = null;
+    else if (!compare.a) compare.a = id;
+    else if (!compare.b) compare.b = id;
+    else { compare.a = compare.b; compare.b = id; }
+    updateCompareUI();
+    updateCompareChecks();
+    soundClick();
+  }
+
+  function updateCompareChecks() {
+    document.querySelectorAll('.compare-check').forEach(el => {
+      const id = +el.dataset.cmp;
+      el.classList.toggle('checked', compare.a === id || compare.b === id);
+      el.textContent = (compare.a === id || compare.b === id) ? '✓' : '+';
+    });
+  }
+
+  function updateCompareUI() {
+    const dock = document.getElementById('compareDock');
+    const slotA = document.getElementById('slotA');
+    const slotB = document.getElementById('slotB');
+    const info = document.getElementById('compareInfo');
+
+    if (!compare.a && !compare.b) { dock.classList.remove('active'); return; }
+    dock.classList.add('active');
+
+    function renderSlot(slot, id) {
+      if (!id) {
+        slot.classList.remove('filled');
+        slot.innerHTML = '<div class="compare-empty-hint">Выберите<br>модель</div>';
+        return;
+      }
+      const p = allProducts.find(x => x.id === id);
+      slot.classList.add('filled');
+      slot.innerHTML = `
+        <div class="slot-phone" style="--c1:${p.c1};--c2:${p.c2};"></div>
+        <div class="slot-label">${p.name}</div>
+      `;
+    }
+    renderSlot(slotA, compare.a);
+    renderSlot(slotB, compare.b);
+
+    if (compare.a && compare.b) {
+      const a = allProducts.find(x => x.id === compare.a);
+      const b = allProducts.find(x => x.id === compare.b);
+      const diff = b.price - a.price;
+      const diffText = diff > 0 ? `+${diff.toLocaleString('ru-RU')}` : diff.toLocaleString('ru-RU');
+      info.innerHTML = `<b>Разница:</b> ${diffText} ₽<br><span style="opacity:0.7">${a.price > b.price ? b.name : a.name} дешевле</span>`;
+    } else {
+      info.innerHTML = 'Выберите<br>вторую модель';
+    }
+  }
+
+  function clearCompare() {
+    compare.a = null; compare.b = null;
+    updateCompareUI(); updateCompareChecks(); soundClick();
+  }
+
+  // ============ ЗАСТАВКА НА ЭКРАНЕ ============
+  function playSplash(phoneModelEl, brand) {
+    const frontSide = phoneModelEl.querySelector('.phone-front');
+    if (!frontSide) return;
+    const oldSplash = frontSide.querySelector('.splash-overlay');
+    if (oldSplash) oldSplash.remove();
+
+    const splash = document.createElement('div');
+    splash.className = `splash-overlay splash-${brand}`;
+    if (brand === 'apple') {
+      splash.innerHTML = `
+        <svg class="splash-logo" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+        </svg>
+      `;
+    } else {
+      splash.innerHTML = `<div class="splash-logo">Samsung</div>`;
+    }
+    frontSide.appendChild(splash);
+    requestAnimationFrame(() => splash.classList.add('playing'));
+    soundSplash();
+    setTimeout(() => {
+      splash.style.transition = 'opacity 0.5s';
+      splash.style.opacity = '0';
+      setTimeout(() => splash.remove(), 500);
+    }, 2400);
+  }
+
+  // ============ RENDER ============
+  function renderCards() {
+    pages.forEach((page) => {
+      const gridEl = document.getElementById(page.grid);
+      if (!gridEl) return;
+      gridEl.innerHTML = '';
+      page.products.forEach((p, idx) => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.dataset.id = p.id;
+        card.style.animationDelay = `${idx * 0.06}s`;
+        const isCompared = compare.a === p.id || compare.b === p.id;
+        const phone = renderPhone(p);
+
+        card.innerHTML = `
+          <div class="compare-check ${isCompared ? 'checked' : ''}" data-cmp="${p.id}" title="Сравнить">${isCompared ? '✓' : '+'}</div>
+          <span class="view-more">Подробнее</span>
+          <div class="phone-scene" data-id="${p.id}">
+            <div class="phone-model" id="phone-${p.id}">
+              <div class="phone-side phone-back">${phone.back}</div>
+              <div class="phone-side phone-front">${phone.front}</div>
+            </div>
+            <div class="drag-hint">↻ Покрутите</div>
+          </div>
+          <div class="product-name scramble-target" data-text="${p.name}">${p.name}</div>
+          <div class="product-specs">${p.specs}</div>
+          <div class="product-price">${p.price.toLocaleString('ru-RU')} ₽</div>
+          <button class="add-btn" data-add="${p.id}">Добавить в корзину</button>
+        `;
+        gridEl.appendChild(card);
+
+        rotations[p.id] = { rx: -5, ry: -15, vx: 0, vy: 0, dragging: false };
+        setup3D(`phone-${p.id}`, `.phone-scene[data-id="${p.id}"]`, rotations[p.id]);
+      });
+    });
+    attachScramble();
+  }
+
+  function attachScramble() {
+    if (isTouchDevice) return;
+    document.querySelectorAll('.scramble-target').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        scramble(el);
+        soundHover();
+      });
+    });
+  }
+
+  // ============ 3D ============
+  function setup3D(modelId, sceneSelector, r) {
+    const scene = document.querySelector(sceneSelector);
+    const model = document.getElementById(modelId);
+    if (!scene || !model) return;
+
+    function update() { model.style.transform = `rotateX(${r.rx}deg) rotateY(${r.ry}deg)`; }
+
+    function loop() {
+      if (!r.dragging) {
+        r.ry += r.vy;
+        r.rx += r.vx;
+        r.vx *= 0.94; r.vy *= 0.94;
+        if (Math.abs(r.vx) < 0.01) r.vx = 0;
+        if (Math.abs(r.vy) < 0.01) r.vy = 0;
+        update();
+      }
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    function startDrag(x, y) {
+      r.dragging = true; r.wasDragged = false;
+      r.lastX = x; r.lastY = y;
+      r.vx = 0; r.vy = 0;
+    }
+    function moveDrag(x, y) {
+      if (!r.dragging) return;
+      const dx = x - r.lastX, dy = y - r.lastY;
+      r.ry += dx * 0.6; r.rx -= dy * 0.6;
+      r.vy = dx * 0.6; r.vx = -dy * 0.6;
+      r.lastX = x; r.lastY = y;
+      r.wasDragged = true;
+      update();
+    }
+    function endDrag() { r.dragging = false; }
+
+    scene.addEventListener('mousedown', (e) => {
+      startDrag(e.clientX, e.clientY);
+      e.preventDefault(); e.stopPropagation();
+    });
+    window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+    window.addEventListener('mouseup', endDrag);
+
+    scene.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      startDrag(t.clientX, t.clientY);
+    }, { passive: true });
+    scene.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      moveDrag(t.clientX, t.clientY);
+    }, { passive: true });
+    scene.addEventListener('touchend', endDrag);
+    scene.addEventListener('touchcancel', endDrag);
+  }
+
+  // ============ PAGE FLIP ============
+  const pageIndicator = document.getElementById('pageIndicator');
+  const transitionOverlay = document.getElementById('transitionOverlay');
+  const transitionLabel = document.getElementById('transitionLabel');
+
+  function buildIndicator() {
+    if (!pageIndicator) return;
+    pageIndicator.innerHTML = '';
+    pages.forEach((p, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'page-dot' + (i === currentPage ? ' active' : '');
+      dot.title = p.name;
+      dot.onclick = () => goToPage(i);
+      pageIndicator.appendChild(dot);
+    });
+  }
+
+  function updateIndicator() {
+    document.querySelectorAll('.page-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === currentPage);
+    });
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    if (prev) prev.disabled = currentPage === 0;
+    if (next) next.disabled = currentPage === pages.length - 1;
+  }
+
+  function goToPage(targetIdx) {
+    if (isFlipping) return;
+    if (targetIdx < 0 || targetIdx >= pages.length) return;
+    if (targetIdx === currentPage) return;
+
+    isFlipping = true;
+    soundPage();
+    closeProductModal();
+
+    const direction = targetIdx > currentPage ? 'forward' : 'backward';
+    const currentPageEl = document.getElementById(pages[currentPage].page);
+    const targetPageEl = document.getElementById(pages[targetIdx].page);
+    const targetBrand = pages[targetIdx].name.toLowerCase();
+
+    if (direction === 'forward') {
+      currentPageEl.classList.add('slide-out-left');
+    } else {
+      currentPageEl.classList.add('slide-out-right');
+    }
+
+    targetPageEl.classList.remove('hidden');
+    targetPageEl.classList.add(direction === 'forward' ? 'slide-in-right' : 'slide-in-left');
+
+    setTimeout(() => {
+      transitionOverlay.classList.remove('morph-to-samsung', 'morph-to-apple');
+      if (targetBrand === 'samsung') {
+        transitionOverlay.classList.add('morph-to-samsung');
+        transitionLabel.textContent = 'Samsung';
+      } else {
+        transitionOverlay.classList.add('morph-to-apple');
+        transitionLabel.textContent = 'Apple';
+      }
+      transitionOverlay.classList.add('active');
+    }, 400);
+
+    setTimeout(() => {
+      transitionOverlay.classList.remove('active');
+      setTimeout(() => {
+        targetPageEl.classList.remove('slide-in-right', 'slide-in-left');
+        setTimeout(() => {
+          currentPageEl.classList.add('hidden');
+          currentPageEl.classList.remove('slide-out-left', 'slide-out-right');
+          currentPage = targetIdx;
+          updateIndicator();
+          isFlipping = false;
+          if (window.scrollY > 100) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 700);
+      }, 300);
+    }, 1500);
+  }
+
+  // ============ MODAL ============
+  const modalOverlay = document.getElementById('productModalOverlay');
+  const modalContent = document.getElementById('modalContent');
+
+  function openProductModal(id) {
+    const p = allProducts.find(x => x.id === id);
+    if (!p) return;
+
+    const stars = '★'.repeat(p.rating) + '☆'.repeat(5 - p.rating);
+    const discount = Math.round((1 - p.price / p.oldPrice) * 100);
+    const categoryLabel = p.brand === 'apple' ? 'iPhone' : 'Samsung Galaxy';
+    const phone = renderPhone(p);
+
+    modalContent.innerHTML = `
+      <div class="modal-phone-visual">
+        <div class="modal-phone-scene" id="modalScene">
+          <div class="modal-phone-model" id="modalPhone">
+            <div class="phone-side phone-back">${phone.back}</div>
+            <div class="phone-side phone-front">${phone.front}</div>
+          </div>
+        </div>
+        <button class="splash-btn" id="splashBtn">▶ Показать заставку ${p.brand === 'apple' ? 'Apple' : 'Samsung'}</button>
+      </div>
+      <div class="modal-info">
+        <span class="modal-category">${categoryLabel} · ${p.model}</span>
+        <h2 class="modal-title">${p.name}</h2>
+        <div class="modal-rating">
+          <span class="stars">${stars}</span>
+          <span class="rating-text">${p.ratingCount.toLocaleString('ru-RU')} отзывов</span>
+        </div>
+        <p class="modal-description">${p.description}</p>
+        <div class="modal-specs-title">Характеристики</div>
+        <div class="modal-specs">
+          ${p.detailSpecs.map(s => `
+            <div class="spec-item">
+              <span class="spec-icon">${s.icon}</span>
+              <div class="spec-text">
+                <span class="spec-label">${s.label}</span>
+                ${s.value}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="modal-price-row">
+          <div>
+            <span class="modal-price">${p.price.toLocaleString('ru-RU')} ₽</span>
+            <span class="modal-old-price">${p.oldPrice.toLocaleString('ru-RU')} ₽</span>
+            <div style="color:var(--accent-2);font-size:0.8rem;margin-top:4px;">Скидка ${discount}%</div>
+          </div>
+          <button class="modal-add-btn" data-add="${p.id}">В корзину</button>
+        </div>
+      </div>
+    `;
+
+    modalRotations[id] = { rx: -5, ry: -15, vx: 0, vy: 0, dragging: false };
+    setup3D('modalPhone', '#modalScene', modalRotations[id]);
+
+    document.getElementById('splashBtn').onclick = (e) => {
+      e.stopPropagation();
+      const phoneEl = document.getElementById('modalPhone');
+      playSplash(phoneEl, p.brand);
+      const btn = e.currentTarget;
+      btn.classList.add('playing');
+      btn.textContent = '♪ Играет заставка...';
+      setTimeout(() => {
+        btn.classList.remove('playing');
+        btn.textContent = `▶ Показать заставку ${p.brand === 'apple' ? 'Apple' : 'Samsung'}`;
+      }, 2400);
+    };
+
+    modalOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeProductModal() {
+    modalOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) closeProductModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeProductModal();
+    if (e.key === 'ArrowRight' && !modalOverlay.classList.contains('active')) goToPage(currentPage + 1);
+    if (e.key === 'ArrowLeft' && !modalOverlay.classList.contains('active')) goToPage(currentPage - 1);
+  });
+
+  document.querySelectorAll('.product-grid').forEach(gridEl => {
+    gridEl.addEventListener('click', (e) => {
+      if (e.target.closest('.add-btn')) return;
+      if (e.target.closest('.compare-check')) {
+        const cmpEl = e.target.closest('.compare-check');
+        toggleCompare(+cmpEl.dataset.cmp, e);
+        return;
+      }
+      const card = e.target.closest('.product-card');
+      if (!card) return;
+      const r = rotations[card.dataset.id];
+      if (r && r.wasDragged) { r.wasDragged = false; return; }
+
+      const id = +card.dataset.id;
+      const p = allProducts.find(x => x.id === id);
+      const phoneEl = document.getElementById('phone-' + id);
+      if (phoneEl) playSplash(phoneEl, p.brand);
+      soundClick();
+      setTimeout(() => openProductModal(id), 300);
+    });
+  });
+
+  // ============ CART ============
+  const cartItemsEl = document.getElementById('cartItems');
+  const cartCountEl = document.getElementById('cartCount');
+  const cartTotalEl = document.getElementById('cartTotal');
+  const cartFooterEl = document.getElementById('cartFooter');
+
+  function addToCart(id) {
+    cart[id] = (cart[id] || 0) + 1;
+    renderCart();
+    const p = allProducts.find(x => x.id === id);
+    showToast(`✓ ${p.name} добавлен`);
+    soundAdd();
+    cartCountEl.classList.remove('bump');
+    void cartCountEl.offsetWidth;
+    cartCountEl.classList.add('bump');
+  }
+
+  function changeQty(id, delta) {
+    if (!cart[id]) return;
+    cart[id] += delta;
+    if (cart[id] <= 0) delete cart[id];
+    renderCart(); soundClick();
+  }
+  function removeItem(id) { delete cart[id]; renderCart(); soundClick(); }
+
+  function renderCart() {
+    const ids = Object.keys(cart);
+    const totalCount = ids.reduce((s, id) => s + cart[id], 0);
+    cartCountEl.textContent = totalCount;
+    if (ids.length === 0) {
+      cartItemsEl.innerHTML = `<div class="cart-empty"><span class="cart-empty-icon">🛒</span>Корзина пуста</div>`;
+      cartFooterEl.style.display = 'none';
+      return;
+    }
+    let total = 0;
+    cartItemsEl.innerHTML = ids.map(id => {
+      const p = allProducts.find(x => x.id == id);
+      const qty = cart[id];
+      total += p.price * qty;
+      const brand = p.brand || 'apple';
+      return `
+        <div class="cart-item">
+          <div class="cart-item-thumb">${miniPhoneSVG(p.c1, p.c2, brand)}</div>
+          <div class="cart-item-info">
+            <div class="cart-item-name">${p.name}</div>
+            <div class="cart-item-price">${(p.price * qty).toLocaleString('ru-RU')} ₽</div>
+            <div class="cart-item-controls">
+              <button class="qty-btn" onclick="changeQty(${p.id}, -1)">−</button>
+              <span class="qty-value">${qty}</span>
+              <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
+            </div>
+          </div>
+          <button class="remove-item" onclick="removeItem(${p.id})">🗑</button>
+        </div>
+      `;
+    }).join('');
+    cartTotalEl.textContent = total.toLocaleString('ru-RU') + ' ₽';
+    cartFooterEl.style.display = 'block';
+  }
+
+  function toggleCart() {
+    document.getElementById('cartPanel').classList.toggle('active');
+    document.getElementById('cartOverlay').classList.toggle('active');
+    soundClick();
+  }
+
+  function checkout() {
+    if (Object.keys(cart).length === 0) return;
+    showToast('✓ Заказ оформлен! Мы свяжемся с вами.');
+    for (const k in cart) delete cart[k];
+    renderCart();
+    setTimeout(toggleCart, 800);
+  }
+
+  let toastTimer;
+  function showToast(text) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastText').textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  document.addEventListener('click', (e) => {
+    const addBtn = e.target.closest('[data-add]');
+    if (addBtn) {
+      e.stopPropagation();
+      const id = +addBtn.dataset.add;
+      addToCart(id);
+      const orig = addBtn.textContent;
+      addBtn.classList.add('added');
+      addBtn.textContent = '✓ Добавлено';
+      setTimeout(() => {
+        addBtn.classList.remove('added');
+        addBtn.textContent = orig;
+      }, 1500);
+    }
+  });
+
+  // ============ INIT ============
+  applyTheme('dark');
+  renderCards();
+  buildIndicator();
+  updateIndicator();
+  renderCart();
+  createSmoke();
+
+  // Дополнительный страховочный таймер — на случай, если что-то пошло не так
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const loader = document.getElementById('loader');
+      if (loader && !loader.classList.contains('done')) {
+        loader.classList.add('done');
+        setTimeout(() => { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 800);
+      }
+      soundSplash();
+    }, 700);
+  });
+
+  // Перерисовка при повороте экрана
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+    }, 200);
+  });
+</script>
+
+</body>
+</html>
